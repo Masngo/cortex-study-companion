@@ -1,37 +1,49 @@
-const ITEMS_KEY = 'cortex_study_items';
-const STATS_KEY = 'cortex_practice_stats';
+const ITEMS_KEY = 'cortex_study_portfolio';
+const STATS_KEY = 'cortex_practice_tracker';
 
 export function getStudyItems() {
   try {
-    return JSON.parse(localStorage.getItem(ITEMS_KEY) || '[]');
+    const raw = localStorage.getItem(ITEMS_KEY);
+    return raw ? JSON.parse(raw) : [];
   } catch (e) {
     return [];
   }
 }
 
 export function saveStudyItem(entry) {
-  const items = getStudyItems();
-  items.unshift(entry);
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
-  return true;
+  try {
+    const current = getStudyItems();
+    localStorage.setItem(ITEMS_KEY, JSON.stringify([entry, ...current]));
+  } catch (e) {
+    console.error('Failed persistence save', e);
+  }
 }
 
 export function deleteStudyItem(id) {
-  const items = getStudyItems().filter((i) => i.id !== id);
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
+  try {
+    const current = getStudyItems();
+    localStorage.setItem(ITEMS_KEY, JSON.stringify(current.filter(i => i.id !== id)));
+  } catch (e) {
+    console.error('Failed deletion', e);
+  }
 }
 
 export function getStats() {
   try {
-    return JSON.parse(localStorage.getItem(STATS_KEY) || '{"correct":0,"incorrect":0}');
+    const raw = localStorage.getItem(STATS_KEY);
+    return raw ? JSON.parse(raw) : { correct: 0, incorrect: 0 };
   } catch (e) {
     return { correct: 0, incorrect: 0 };
   }
 }
 
-export function recordAnswer(result) {
-  const stats = getStats();
-  const next = { ...stats, [result === 'correct' ? 'correct' : 'incorrect']: stats[result === 'correct' ? 'correct' : 'incorrect'] + 1 };
-  localStorage.setItem(STATS_KEY, JSON.stringify(next));
-  return next;
+export function updateStats(isCorrect) {
+  try {
+    const current = getStats();
+    if (isCorrect) current.correct += 1;
+    else current.incorrect += 1;
+    localStorage.setItem(STATS_KEY, JSON.stringify(current));
+  } catch (e) {
+    console.error('Failed profile incremental update', e);
+  }
 }

@@ -1,57 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { FolderOpen, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { BookMarked, FolderOpen, Trash2 } from 'lucide-react';
 import { TOKENS, TYPE_LABELS } from '../lib/tokens.js';
 import { getStudyItems, deleteStudyItem } from '../lib/storage.js';
 
 export default function SavedTab({ refreshKey, onOpen }) {
-  const [saved, setSaved] = useState([]);
+  const [items, setItems] = useState([]);
 
   useEffect(() => {
-    setSaved(getStudyItems());
+    setItems(getStudyItems());
   }, [refreshKey]);
 
-  const remove = (id) => {
+  const remove = (id, e) => {
+    e.stopPropagation();
     deleteStudyItem(id);
-    setSaved((prev) => prev.filter((e) => e.id !== id));
+    setItems(getStudyItems());
   };
 
-  if (saved.length === 0) {
+  if (items.length === 0) {
     return (
       <div style={{ background: TOKENS.blueprint }} className="rounded-md p-6 text-center">
-        <FolderOpen size={22} color={TOKENS.gold} className="mx-auto mb-2" />
-        <p style={{ color: '#ffffffaa' }} className="text-sm">Nothing saved yet — build a diagram and hit "Save to Study Log."</p>
+        <BookMarked size={22} color={TOKENS.gold} className="mx-auto mb-2" />
+        <p style={{ color: '#ffffffaa' }} className="text-sm">Your Study Log portfolio is empty. Save generated maps from the Explore panel.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      {saved.map((entry) => (
-        <div key={entry.id} style={{ background: TOKENS.paper }} className="rounded-md p-4 flex items-center justify-between gap-3 flex-wrap">
+    <div className="grid gap-3 sm:grid-cols-2">
+      {items.map((item) => (
+        <div
+          key={item.id}
+          onClick={() => onOpen(item.diagram, item.topic)}
+          style={{ background: TOKENS.paper }}
+          className="rounded-md p-4 cursor-pointer transition-shadow hover:shadow-md flex flex-col justify-between group relative"
+        >
           <div>
-            <div className="flex items-center gap-2">
-              <span style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }} className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-sm">
-                {TYPE_LABELS[entry.diagram.type] || entry.diagram.type}
+            <div className="flex justify-between items-start gap-2 mb-1.5">
+              <span style={{ background: TOKENS.ink + '10', color: TOKENS.inkSoft }} className="text-[9px] font-mono tracking-wide uppercase px-1.5 py-0.5 rounded-sm">
+                {TYPE_LABELS[item.diagram.type] || item.diagram.type}
               </span>
-              <p style={{ color: TOKENS.ink, fontFamily: "'Fraunces', serif" }} className="font-semibold text-sm">{entry.title}</p>
+              <button
+                onClick={(e) => remove(item.id, e)}
+                className="opacity-0 group-hover:opacity-100 p-1 rounded-sm text-black/30 hover:text-red-500 hover:bg-red-50 transition-all outline-none"
+              >
+                <Trash2 size={12} />
+              </button>
             </div>
-            <p style={{ color: TOKENS.inkSoft }} className="text-[11px] mt-1">{entry.diagram.nodes.length} nodes · saved {new Date(entry.savedAt).toLocaleDateString()}</p>
+            <h4 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold text-[14px] leading-snug mb-1">
+              {item.title}
+            </h4>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onOpen(entry.diagram, entry.topic)}
-              style={{ background: TOKENS.ink, color: TOKENS.paper }}
-              className="text-[12px] font-medium px-3 py-1.5 rounded-sm"
-            >
-              Open
-            </button>
-            <button
-              onClick={() => remove(entry.id)}
-              style={{ color: TOKENS.issue }}
-              className="text-[12px] font-medium px-2 py-1.5 rounded-sm flex items-center gap-1"
-            >
-              <Trash2 size={13} />
-            </button>
+          <div className="flex items-center justify-between mt-4 pt-2 border-t" style={{ borderColor: '#0000000a' }}>
+            <span style={{ color: TOKENS.inkSoft }} className="text-[10px] font-mono">
+              {new Date(item.savedAt).toLocaleDateString()}
+            </span>
+            <span style={{ color: TOKENS.ink }} className="text-[11px] font-medium flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+              <FolderOpen size={11} /> Open
+            </span>
           </div>
         </div>
       ))}

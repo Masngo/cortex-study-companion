@@ -1,24 +1,22 @@
 import React, { useState } from 'react';
-import { Loader2, ClipboardCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckSquare, MessageSquare } from 'lucide-react';
 import { TOKENS } from '../lib/tokens.js';
 import { callAI } from '../lib/ai.js';
 import { REVIEW_SYSTEM_PROMPT } from '../lib/prompts.js';
 
 export default function ReviewTab() {
-  const [context, setContext] = useState('');
-  const [work, setWork] = useState('');
-  const [feedback, setFeedback] = useState(null);
+  const [submission, setSubmission] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
-  const review = async () => {
-    if (!work.trim()) return;
+  const processReview = async () => {
+    if (!submission.trim()) return;
     setLoading(true);
     setError(false);
     setFeedback(null);
     try {
-      const prompt = `Context / assignment: ${context || '(not provided)'}\n\nStudent's work:\n${work}`;
-      const raw = await callAI(REVIEW_SYSTEM_PROMPT, prompt);
+      const raw = await callAI(REVIEW_SYSTEM_PROMPT, submission);
       setFeedback(JSON.parse(raw));
     } catch (e) {
       setError(true);
@@ -29,62 +27,50 @@ export default function ReviewTab() {
 
   return (
     <div>
-      <div style={{ background: TOKENS.blueprint }} className="rounded-md p-4 mb-5 space-y-3">
-        <div>
-          <label style={{ color: '#ffffffaa' }} className="text-[11px] uppercase tracking-wide">Context (optional, helps accuracy)</label>
-          <textarea
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
-            placeholder="The assignment, prompt, or goal this work is for"
-            rows={2}
-            style={{ background: TOKENS.paper, color: TOKENS.ink }}
-            className="w-full text-sm px-3 py-2 rounded-sm outline-none resize-none mt-1 placeholder:text-black/40"
-          />
+      <div style={{ background: TOKENS.blueprint }} className="rounded-md p-4 mb-5">
+        <div className="flex items-center gap-1.5 mb-2">
+          <CheckSquare size={14} color={TOKENS.gold} />
+          <h3 style={{ color: TOKENS.paper }} className="text-[13px] font-semibold">Submit your draft work or solution</h3>
         </div>
-        <div>
-          <label style={{ color: '#ffffffaa' }} className="text-[11px] uppercase tracking-wide">Your work</label>
-          <textarea
-            value={work}
-            onChange={(e) => setWork(e.target.value)}
-            placeholder="Paste a schema, code, an outline, a design, an argument — anything you're working on"
-            rows={5}
-            style={{ background: TOKENS.paper, color: TOKENS.ink, fontFamily: "'JetBrains Mono', monospace" }}
-            className="w-full text-[13px] px-3 py-2 rounded-sm outline-none resize-none mt-1 placeholder:text-black/30"
-          />
+        <textarea
+          value={submission}
+          onChange={(e) => setSubmission(e.target.value)}
+          placeholder='Paste code, SQL blocks, text rationales, system designs, or math answers here for structural critique...'
+          rows={5}
+          style={{ background: TOKENS.paper, color: TOKENS.ink }}
+          className="w-full text-sm px-3 py-2 rounded-sm outline-none resize-none placeholder:text-black/40"
+        />
+        <div className="flex justify-end mt-2">
+          <button
+            onClick={processReview}
+            disabled={loading}
+            style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[12px] font-semibold flex-shrink-0"
+          >
+            {loading ? <Loader2 size={13} className="animate-spin" /> : <MessageSquare size={13} />}
+            {loading ? 'Analyzing...' : 'Get Structure Feedback'}
+          </button>
         </div>
-        <button
-          onClick={review}
-          disabled={loading}
-          style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[12px] font-semibold"
-        >
-          {loading ? <Loader2 size={13} className="animate-spin" /> : <ClipboardCheck size={13} />}
-          {loading ? 'Reviewing...' : 'Review my work'}
-        </button>
-        {error && <p style={{ color: '#f5a3a3' }} className="text-[11px]">Couldn't review that — check the format and try again.</p>}
+        {error && <p style={{ color: '#f5a3a3' }} className="text-[11px] mt-1.5">Analysis failed — try shortening your snippet.</p>}
       </div>
 
       {feedback && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div style={{ background: TOKENS.goodSoft }} className="rounded-md p-4">
-            <h4 style={{ color: TOKENS.good }} className="text-[12px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <CheckCircle2 size={13} /> What's working
-            </h4>
-            <ul className="space-y-2">
-              {feedback.strengths.map((s, i) => (
-                <li key={i} style={{ color: TOKENS.ink }} className="text-[13px]">{s}</li>
-              ))}
+        <div style={{ background: TOKENS.paper }} className="rounded-md p-5 space-y-4">
+          <div>
+            <h4 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold text-sm mb-1">What You Handled Well</h4>
+            <p style={{ color: TOKENS.ink }} className="text-[13px] leading-relaxed">{feedback.strengths}</p>
+          </div>
+          <div className="border-t pt-3" style={{ borderColor: '#0000000a' }}>
+            <h4 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold text-sm mb-1">Structural Flaws & Gap Realities</h4>
+            <ul className="list-disc pl-4 space-y-1 text-[13px]" style={{ color: TOKENS.ink }}>
+              {feedback.gaps.map((g, i) => <li key={i}>{g}</li>)}
             </ul>
           </div>
-          <div style={{ background: TOKENS.issueSoft }} className="rounded-md p-4">
-            <h4 style={{ color: TOKENS.issue }} className="text-[12px] font-semibold uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <AlertTriangle size={13} /> Worth fixing
-            </h4>
-            <ul className="space-y-2">
-              {feedback.issues.map((s, i) => (
-                <li key={i} style={{ color: TOKENS.ink }} className="text-[13px]">{s}</li>
-              ))}
-            </ul>
+          <div className="border-t pt-3" style={{ borderColor: '#0000000a' }}>
+            <h4 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold text-sm mb-1">Refactored / Recommended Version</h4>
+            <pre style={{ background: TOKENS.blueprintDeep, color: TOKENS.paper, fontFamily: "'JetBrains Mono', monospace" }} className="p-3 text-[11px] overflow-auto rounded-sm mt-1 leading-relaxed">
+              <code>{feedback.refactoredVersion}</code>
+            </pre>
           </div>
         </div>
       )}
