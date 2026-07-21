@@ -9,204 +9,153 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Smart Fallback Engine: Builds comprehensive multi-table schemas and full SQL DDL scripts.
+ * Universal Educational & Technical Fallback Engine
+ * Generates tailored diagrams, rationales, and code across all educational domains.
  */
-function generateSmartDiagram(prompt = '') {
+function generateUniversalDiagram(prompt = '') {
   const query = prompt.toLowerCase();
 
-  // 1. Hospital Management System
-  if (query.includes('hospital') || query.includes('patient') || query.includes('doctor')) {
+  // ---------------------------------------------------------------------------
+  // 1. MACHINE LEARNING, AI & DATA SCIENCE
+  // ---------------------------------------------------------------------------
+  if (query.includes('random forest') || query.includes('predict') || query.includes('classification') || query.includes('regression') || query.includes('machine learning') || query.includes('model') || query.includes('neural')) {
     return JSON.stringify({
-      title: "Hospital Management System Architecture",
-      type: "schema",
+      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Pipeline`,
+      type: "process",
       nodes: [
-        { id: "patients", label: "Patients Table", detail: ["Patient_ID (PK)", "Full_Name", "DOB", "Phone", "Created_At"] },
-        { id: "doctors", label: "Doctors Table", detail: ["Doctor_ID (PK)", "Name", "Specialty", "Email", "Department_ID"] },
-        { id: "appointments", label: "Appointments Table", detail: ["Appointment_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Appointment_Date", "Status"] },
-        { id: "records", label: "Medical Records Table", detail: ["Record_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Diagnosis", "Treatment_Plan", "Prescription"] },
-        { id: "bills", label: "Billing & Invoices Table", detail: ["Bill_ID (PK)", "Patient_ID (FK)", "Total_Amount", "Payment_Status", "Issue_Date"] }
+        { id: "data_ingest", label: "1. Data Collection & Ingestion", detail: ["Feature Extraction", "Handling Missing Data", "Target Variable Definition"] },
+        { id: "preprocessing", label: "2. Preprocessing & Scaling", detail: ["Train/Test Split (80/20)", "Feature Normalization", "Encoding Categorical Variables"] },
+        { id: "model_training", label: "3. Model Training & Tuning", detail: ["Ensemble/Model Selection", "Hyperparameter Optimization", "Cross-Validation"] },
+        { id: "evaluation", label: "4. Evaluation & Inference", detail: ["Accuracy / R² Score / RMSE", "Feature Importance Analysis", "Model Prediction Output"] }
       ],
       edges: [
-        { from: "patients", to: "appointments", label: "schedules" },
-        { from: "doctors", to: "appointments", label: "conducts" },
-        { from: "patients", to: "records", label: "has clinical history" },
-        { from: "doctors", to: "records", label: "prescribes" },
-        { from: "patients", to: "bills", label: "billed for service" }
+        { from: "data_ingest", to: "preprocessing", label: "raw dataset" },
+        { from: "preprocessing", to: "model_training", label: "scaled features" },
+        { from: "model_training", to: "evaluation", label: "trained model" }
       ],
       rationale: [
-        "Normalizes patient demographics away from transactional clinical visits.",
-        "Uses Appointments as a junction table coordinating Doctor availability and Patient slots.",
-        "Establishes separate Medical Records and Billing tables to enforce HIPAA data privacy role boundaries."
+        "Isolates feature engineering from model evaluation to prevent data leakage.",
+        "Evaluates performance metrics across test sets to ensure generalization.",
+        "Ranks feature importances to highlight primary predictive drivers."
       ],
       code: {
-        language: "sql",
-        content: `-- Complete Multi-Table Schema for Hospital Management
-CREATE TABLE Patients (
-  Patient_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Full_Name VARCHAR(100) NOT NULL,
-  DOB DATE NOT NULL,
-  Phone VARCHAR(20),
-  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE Doctors (
-  Doctor_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Name VARCHAR(100) NOT NULL,
-  Specialty VARCHAR(50) NOT NULL,
-  Email VARCHAR(100) UNIQUE,
-  Department_ID INT
-);
-
-CREATE TABLE Appointments (
-  Appointment_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Patient_ID INT NOT NULL,
-  Doctor_ID INT NOT NULL,
-  Appointment_Date DATETIME NOT NULL,
-  Status VARCHAR(20) DEFAULT 'Scheduled',
-  FOREIGN KEY (Patient_ID) REFERENCES Patients(Patient_ID) ON DELETE CASCADE,
-  FOREIGN KEY (Doctor_ID) REFERENCES Doctors(Doctor_ID) ON DELETE RESTRICT
-);
-
-CREATE TABLE Medical_Records (
-  Record_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Patient_ID INT NOT NULL,
-  Doctor_ID INT NOT NULL,
-  Diagnosis TEXT NOT NULL,
-  Treatment_Plan TEXT,
-  Prescription TEXT,
-  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (Patient_ID) REFERENCES Patients(Patient_ID) ON DELETE CASCADE,
-  FOREIGN KEY (Doctor_ID) REFERENCES Doctors(Doctor_ID) ON DELETE RESTRICT
-);
-
-CREATE TABLE Billing (
-  Bill_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Patient_ID INT NOT NULL,
-  Total_Amount DECIMAL(10,2) NOT NULL,
-  Payment_Status VARCHAR(20) DEFAULT 'Pending',
-  Issue_Date DATE NOT NULL,
-  FOREIGN KEY (Patient_ID) REFERENCES Patients(Patient_ID) ON DELETE CASCADE
-);`
+        language: "python",
+        content: `# Machine Learning Pipeline Example\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error\n\n# 1. Load Data & Prepare Features\nX = pd.DataFrame({'feature_1': np.random.rand(100), 'feature_2': np.random.rand(100)})\ny = np.random.rand(100)\n\n# 2. Split Data\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# 3. Model Training\nmodel = RandomForestRegressor(n_estimators=100, random_state=42)\nmodel.fit(X_train, y_train)\n\n# 4. Predict & Evaluate\npredictions = model.predict(X_test)\nprint("RMSE:", mean_squared_error(y_test, predictions, squared=False))`
       }
     });
   }
 
-  // 2. Library Management System
-  if (query.includes('library') || query.includes('book') || query.includes('borrow')) {
+  // ---------------------------------------------------------------------------
+  // 2. BIOLOGY, ECOLOGY & NATURAL SCIENCES
+  // ---------------------------------------------------------------------------
+  if (query.includes('water cycle') || query.includes('photosynthesis') || query.includes('cell') || query.includes('biology') || query.includes('ecosystem') || query.includes('dna') || query.includes('mitosis')) {
     return JSON.stringify({
-      title: "Library Management System Architecture",
-      type: "schema",
+      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Process Diagram`,
+      type: "process",
       nodes: [
-        { id: "members", label: "Members Table", detail: ["Member_ID (PK)", "Name", "Email", "Join_Date"] },
-        { id: "books", label: "Books Table", detail: ["ISBN (PK)", "Title", "Author", "Publisher", "Copies_Available"] },
-        { id: "loans", label: "Loans Table", detail: ["Loan_ID (PK)", "Member_ID (FK)", "ISBN (FK)", "Issue_Date", "Due_Date"] },
-        { id: "fines", label: "Fines Table", detail: ["Fine_ID (PK)", "Loan_ID (FK)", "Amount", "Paid_Status"] }
+        { id: "stage1", label: "Stage 1: Primary Inputs", detail: ["Absorption of Solar Energy", "Ingestion of Raw Elements", "Initial Catalyst Activation"] },
+        { id: "stage2", label: "Stage 2: Cellular Transformation", detail: ["Chemical Conversion Reactions", "Energy Transfer (ATP / Synthesis)", "Intermediate Byproducts"] },
+        { id: "stage3", label: "Stage 3: Output & Biomass", detail: ["Release of Gases / Yields", "Energy Storage", "System Balance Maintenance"] }
       ],
       edges: [
-        { from: "members", to: "loans", label: "borrows" },
-        { from: "books", to: "loans", label: "checked out in" },
-        { from: "loans", to: "fines", label: "incurs" }
+        { from: "stage1", to: "stage2", label: "triggers reaction" },
+        { from: "stage2", to: "stage3", label: "yields end product" }
       ],
       rationale: [
-        "Separates physical book inventory from member account activity.",
-        "Loans table records active borrowing states with due date constraints.",
-        "Fines link directly to Loan transactions for explicit auditability."
+        "Maps thermodynamic energy transfer across biological subsystems.",
+        "Demonstrates conservation of mass and energy through biological feedback loops."
       ],
       code: {
-        language: "sql",
-        content: `-- Complete Multi-Table Schema for Library Management
-CREATE TABLE Members (
-  Member_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Name VARCHAR(100) NOT NULL,
-  Email VARCHAR(100) UNIQUE NOT NULL,
-  Join_Date DATE DEFAULT (CURRENT_DATE)
-);
-
-CREATE TABLE Books (
-  ISBN VARCHAR(20) PRIMARY KEY,
-  Title VARCHAR(255) NOT NULL,
-  Author VARCHAR(100) NOT NULL,
-  Publisher VARCHAR(100),
-  Copies_Available INT DEFAULT 1 CHECK (Copies_Available >= 0)
-);
-
-CREATE TABLE Loans (
-  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Member_ID INT NOT NULL,
-  ISBN VARCHAR(20) NOT NULL,
-  Issue_Date DATE DEFAULT (CURRENT_DATE),
-  Due_Date DATE NOT NULL,
-  Return_Date DATE,
-  FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID),
-  FOREIGN KEY (ISBN) REFERENCES Books(ISBN)
-);
-
-CREATE TABLE Fines (
-  Fine_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Loan_ID INT NOT NULL,
-  Amount DECIMAL(6,2) NOT NULL DEFAULT 0.00,
-  Paid_Status BOOLEAN DEFAULT FALSE,
-  FOREIGN KEY (Loan_ID) REFERENCES Loans(Loan_ID)
-);`
+        language: "text",
+        content: `# Chemical Balance Equation Representation\nInputs: 6CO2 + 6H2O + Light Energy\nTransform: Chlorophyll Enzymatic Reactions\nOutputs: C6H12O6 (Glucose) + 6O2`
       }
     });
   }
 
-  // 3. Generic Multi-Table Fallback for any other prompt
-  const cleanTitle = prompt.trim() ? prompt.slice(0, 40) : 'System';
-  const entityName = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+  // ---------------------------------------------------------------------------
+  // 3. COMPUTER NETWORKING, PROTOCOLS & SECURITY
+  // ---------------------------------------------------------------------------
+  if (query.includes('tcp') || query.includes('handshake') || query.includes('network') || query.includes('oauth') || query.includes('http') || query.includes('dns') || query.includes('security')) {
+    return JSON.stringify({
+      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Flow`,
+      type: "process",
+      nodes: [
+        { id: "client_req", label: "1. Client Request Ingestion", detail: ["Initiates Connection / Payload", "Includes Security Tokens / Headers", "State: Pending"] },
+        { id: "server_ack", label: "2. Server Handshake & Verification", detail: ["Validates Credentials / Flags", "Allocates Connection Resources", "Sends Response Acknowledgment"] },
+        { id: "established", label: "3. Secure Session Established", detail: ["Bidirectional Data Stream", "Enforces Encryption Protocols", "State: Established"] }
+      ],
+      edges: [
+        { from: "client_req", to: "server_ack", label: "sends SYN / Request" },
+        { from: "server_ack", to: "established", label: "returns SYN-ACK / Verification" }
+      ],
+      rationale: [
+        "Guarantees message integrity before processing high-privilege payloads.",
+        "Establishes initial sequence numbers to manage packet ordering."
+      ],
+      code: {
+        language: "python",
+        content: `# Python Socket Connection Example\nimport socket\n\nclient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\nclient.connect(("localhost", 8080))\nclient.sendall(b"Hello Server")\nresponse = client.recv(1024)\nprint("Received:", response.decode())\nclient.close()`
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4. DATABASE SCHEMAS & SYSTEM ARCHITECTURE
+  // ---------------------------------------------------------------------------
+  if (query.includes('database') || query.includes('sql') || query.includes('schema') || query.includes('hospital') || query.includes('library') || query.includes('table')) {
+    return JSON.stringify({
+      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Schema`,
+      type: "schema",
+      nodes: [
+        { id: "entity1", label: "Core Primary Entity", detail: ["Entity_ID (PK)", "Name / Identifier", "Attributes", "Created_At"] },
+        { id: "entity2", label: "Transactional Bridge Entity", detail: ["Tx_ID (PK)", "Entity1_ID (FK)", "Entity3_ID (FK)", "Status"] },
+        { id: "entity3", label: "Supporting Lookup Entity", detail: ["Lookup_ID (PK)", "Category_Name", "Description"] }
+      ],
+      edges: [
+        { from: "entity1", to: "entity2", label: "initiates" },
+        { from: "entity3", to: "entity2", label: "categorizes" }
+      ],
+      rationale: [
+        "Complies with Third Normal Form (3NF) to minimize data redundancy.",
+        "Uses explicit Foreign Key constraints to maintain referential integrity."
+      ],
+      code: {
+        language: "sql",
+        content: `-- Relational Schema SQL Structure\nCREATE TABLE Primary_Entity (\n  Entity_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE Transaction_Log (\n  Tx_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Entity_ID INT NOT NULL,\n  Status VARCHAR(50) DEFAULT 'Active',\n  FOREIGN KEY (Entity_ID) REFERENCES Primary_Entity(Entity_ID) ON DELETE CASCADE\n);`
+      }
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // 5. GENERAL EDUCATIONAL / ALGORITHMIC / OTHER SUBJECTS
+  // ---------------------------------------------------------------------------
+  const cleanTitle = prompt.trim() ? prompt.slice(0, 40) : 'Study Topic';
+  const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
 
   return JSON.stringify({
-    title: `${entityName} Architecture Schema`,
-    type: "schema",
+    title: `${formattedTitle} Conceptual Breakdown`,
+    type: "process",
     nodes: [
-      { id: "users", label: "Users Table", detail: ["User_ID (PK)", "Username", "Email", "Password_Hash", "Role"] },
-      { id: "resources", label: `${entityName} Records Table`, detail: ["Resource_ID (PK)", "User_ID (FK)", "Title", "Status", "Created_At"] },
-      { id: "activity_logs", label: "Audit Logs Table", detail: ["Log_ID (PK)", "User_ID (FK)", "Resource_ID (FK)", "Action", "Timestamp"] }
+      { id: "foundations", label: "1. Core Principles & Inputs", detail: ["Fundamental Definitions", "Prerequisite Knowledge", "Initial System Inputs"] },
+      { id: "transformation", label: "2. Analysis & Transformations", detail: ["Core Logic Application", "Rule Execution", "Data / Concept Structuring"] },
+      { id: "synthesis", label: "3. Synthesis & Real-World Application", detail: ["Final Outcomes & Solutions", "Performance & Impact Metrics", "Practical Integration"] }
     ],
     edges: [
-      { from: "users", to: "resources", label: "manages" },
-      { from: "users", to: "activity_logs", label: "performs" },
-      { from: "resources", to: "activity_logs", label: "logs changes" }
+      { from: "foundations", to: "transformation", label: "applies principles to" },
+      { from: "transformation", to: "synthesis", label: "yields actionable outcome" }
     ],
     rationale: [
-      "Establishes Third Normal Form (3NF) compliance across operational tables.",
-      "Implements Foreign Keys with CASCADE / RESTRICT rules for referential integrity.",
-      "Maintains audit logs to track entity modifications over time."
+      "Breaks down complex academic subjects into sequential, manageable concepts.",
+      "Connects theoretical principles directly to practical, real-world outputs."
     ],
     code: {
-      language: "sql",
-      content: `-- Complete Multi-Table Schema Structure
-CREATE TABLE Users (
-  User_ID INT PRIMARY KEY AUTO_INCREMENT,
-  Username VARCHAR(50) UNIQUE NOT NULL,
-  Email VARCHAR(100) UNIQUE NOT NULL,
-  Password_Hash VARCHAR(255) NOT NULL,
-  Role VARCHAR(20) DEFAULT 'Standard'
-);
-
-CREATE TABLE Resources (
-  Resource_ID INT PRIMARY KEY AUTO_INCREMENT,
-  User_ID INT NOT NULL,
-  Title VARCHAR(150) NOT NULL,
-  Status VARCHAR(30) DEFAULT 'Active',
-  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (User_ID) REFERENCES Users(User_ID) ON DELETE CASCADE
-);
-
-CREATE TABLE Audit_Logs (
-  Log_ID INT PRIMARY KEY AUTO_INCREMENT,
-  User_ID INT NOT NULL,
-  Resource_ID INT NOT NULL,
-  Action VARCHAR(50) NOT NULL,
-  Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (User_ID) REFERENCES Users(User_ID),
-  FOREIGN KEY (Resource_ID) REFERENCES Resources(Resource_ID) ON DELETE CASCADE
-);`
+      language: "python",
+      content: `# Python Algorithmic Concept Blueprint for ${formattedTitle}\ndef analyze_topic(inputs):\n    # 1. Process foundational parameters\n    processed_inputs = [x.strip() for x in inputs if x]\n    \n    # 2. Execute core logic\n    analysis_result = {"status": "success", "processed_count": len(processed_inputs)}\n    \n    # 3. Output results\n    return analysis_result\n\nprint(analyze_topic(["Concept A", "Concept B"]))`
     }
   });
 }
 
+// POST /api/generate
 app.post('/api/generate', async (req, res) => {
   const { system, prompt, maxTokens } = req.body || {};
 
@@ -214,9 +163,9 @@ app.post('/api/generate', async (req, res) => {
     return res.status(400).json({ error: 'Missing "prompt" in request body' });
   }
 
-  // If no API key is present, output full smart mock schema directly
+  // Use local fallback directly if key is missing or invalid
   if (!process.env.OPENAI_API_KEY) {
-    return res.json({ text: generateSmartDiagram(prompt) });
+    return res.json({ text: generateUniversalDiagram(prompt) });
   }
 
   try {
@@ -232,15 +181,15 @@ app.post('/api/generate', async (req, res) => {
         model: modelName,
         max_tokens: maxTokens || 1800,
         messages: [
-          { role: 'system', content: system || 'Return complete JSON with multi-table DDL SQL scripts in code.content.' },
+          { role: 'system', content: system || 'Return complete JSON with diagram nodes, edges, rationale, and code snippet.' },
           { role: 'user', content: prompt },
         ],
       }),
     });
 
     if (!response.ok) {
-      console.error('OpenAI API status exception:', response.status);
-      return res.json({ text: generateSmartDiagram(prompt) });
+      console.error('OpenAI API Quota/Error (Using Universal Fallback):', response.status);
+      return res.json({ text: generateUniversalDiagram(prompt) });
     }
 
     const data = await response.json();
@@ -250,8 +199,8 @@ app.post('/api/generate', async (req, res) => {
     res.json({ text: cleanText });
 
   } catch (err) {
-    console.error('Server error:', err.message);
-    res.json({ text: generateSmartDiagram(prompt) });
+    console.error('Server error (Using Universal Fallback):', err.message);
+    res.json({ text: generateUniversalDiagram(prompt) });
   }
 });
 
