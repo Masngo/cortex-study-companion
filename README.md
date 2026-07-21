@@ -107,8 +107,9 @@ Here is Cortex in action generating schemas and runnable SQL for different syste
 
 
 ### **2. Library Management System**
-![Library Management Schema](./assets/cortex_app_dashboard8.png)
-![Library Management SQL](./assets/cortex_app_dashboard_runnable-sql_4.png)
+
+<img width="1914" height="973" alt="image" src="https://github.com/user-attachments/assets/ed8b972b-cb2d-4f9d-983d-aad2ea579c13" />
+
 
 ### **3. Farm Management System**
 ![Farm Management Schema](./assets/cortex_app_dashboard7.png)
