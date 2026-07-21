@@ -268,7 +268,45 @@ app.post('/api/generate', async (req, res) => {
     return res.json({ text: generatePracticeFallback(prompt) });
   }
 
-  return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
+  // If no API key or quota exceeded, return the diagram object directly inside { text: ... } or as raw JSON
+  if (!process.env.OPENAI_API_KEY) {
+    return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
+  }
+
+  try {
+    const modelName = process.env.OPENAI_MODEL || 'gpt-4o';
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: modelName,
+        max_tokens: maxTokens || 1800,
+        messages: [
+          { role: 'system', content: system || 'Return JSON payload.' },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn('OpenAI Quota Exceeded — Using Local Diagram Generator:', response.status);
+      return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
+    }
+
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content || '';
+    const cleanText = text.replace(/```json|```/g, '').trim();
+
+    res.json({ text: cleanText });
+
+  } catch (err) {
+    console.error('Server error, using local fallback:', err.message);
+    res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
+  }
 });
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
