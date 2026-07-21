@@ -3,6 +3,17 @@ import { Brain } from 'lucide-react';
 import { TOKENS } from '../lib/tokens.js';
 
 function NodeCard({ node, cardRef }) {
+  if (!node) return null;
+
+  // Safely extract detail array (handles array, string, or fallback properties)
+  const details = Array.isArray(node.detail)
+    ? node.detail
+    : Array.isArray(node.details)
+    ? node.details
+    : typeof node.detail === 'string'
+    ? [node.detail]
+    : [];
+
   return (
     <div
       ref={cardRef}
@@ -12,15 +23,21 @@ function NodeCard({ node, cardRef }) {
       <div style={{ background: TOKENS.ink }} className="px-3 py-2 rounded-t-sm flex items-center gap-1.5">
         <Brain size={13} color={TOKENS.gold} />
         <span style={{ color: TOKENS.paper, fontFamily: "'JetBrains Mono', monospace" }} className="text-[13px] font-semibold">
-          {node.label}
+          {node.label || node.title || node.id || 'Untitled Node'}
         </span>
       </div>
       <div className="px-3 py-2 space-y-1">
-        {node.detail.map((d, i) => (
-          <p key={i} style={{ color: TOKENS.ink, fontFamily: "'JetBrains Mono', monospace" }} className="text-[12px] leading-snug">
-            {d}
+        {details.length > 0 ? (
+          details.map((d, i) => (
+            <p key={i} style={{ color: TOKENS.ink, fontFamily: "'JetBrains Mono', monospace" }} className="text-[12px] leading-snug">
+              {typeof d === 'object' ? JSON.stringify(d) : String(d)}
+            </p>
+          ))
+        ) : (
+          <p style={{ color: TOKENS.ink + 'aa', fontFamily: "'JetBrains Mono', monospace" }} className="text-[11px] italic">
+            No details provided
           </p>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -30,6 +47,9 @@ export default function Diagram({ diagram }) {
   const containerRef = useRef(null);
   const cardRefs = useRef({});
   const [lines, setLines] = useState([]);
+
+  // Safely extract top-level nodes array to prevent runtime crashes
+  const nodes = Array.isArray(diagram?.nodes) ? diagram.nodes : [];
 
   useLayoutEffect(() => {
     if (!diagram) return;
@@ -85,7 +105,7 @@ export default function Diagram({ diagram }) {
         ))}
       </svg>
       <div className="flex flex-wrap gap-8 relative" style={{ zIndex: 1 }}>
-        {diagram.nodes.map((n) => (
+        {nodes.map((n) => (
           <NodeCard key={n.id} node={n} cardRef={(el) => (cardRefs.current[n.id] = el)} />
         ))}
       </div>
