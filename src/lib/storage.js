@@ -11,7 +11,6 @@ export function getStudyLog() {
   }
 }
 
-// Aliases to match SavedTab and other components
 export const getStudyItems = getStudyLog;
 
 export function saveToStudyLog(item) {
@@ -73,4 +72,14 @@ export function savePracticeStats(isCorrect) {
     console.error('Failed to save practice stats', err);
     return getPracticeStats();
   }
+}
+
+export function getStats() {
+  const items = getStudyLog();
+  const practice = getPracticeStats();
+  return {
+    totalStudied: items.length,
+    practiceStats: practice,
+    streak: items.length > 0 ? 1 : 0
+  };
 }
