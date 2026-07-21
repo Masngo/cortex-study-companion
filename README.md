@@ -96,3 +96,19 @@ The `server/index.js` file references the model as `"gpt-5.6"` via `OPENAI_MODEL
 ## License
 
 MIT (or your preferred license) — update before making the repository public.
+
+## 🖼️ Application UI & Generated Architecture
+
+Here is Cortex in action generating schemas and runnable SQL for different system domains:
+
+### **1. Church System Architecture & Schema**
+![Church System Schema](./assets/cortex_app_dashboard5_church.png)
+![Church System SQL](./assets/cortex_app_dashboard6_runnable_sql_church.png)
+
+### **2. Library Management System**
+![Library Management Schema](./assets/cortex_app_dashboard8.png) 
+![Library Management SQL](./assets/cortex_app_dashboard_runnable sql_4.png)
+
+### **3. Farm Management System**
+![Farm Management Schema](./assets/cortex_app_dashboard7.png)
+![Farm Management SQL](./assets/cortex_app_dashboard6.png)
