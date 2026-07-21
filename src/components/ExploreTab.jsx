@@ -21,8 +21,10 @@ export default function ExploreTab({ diagram, setDiagram, topic, setTopic, onSav
     setDiagram(null);
     try {
       const raw = await callAI(EXPLORE_SYSTEM_PROMPT, topic);
-      setDiagram(JSON.parse(raw));
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      setDiagram(parsed);
     } catch (e) {
+      console.error('Error generating diagram:', e);
       setError(true);
     } finally {
       setLoading(false);
@@ -31,11 +33,13 @@ export default function ExploreTab({ diagram, setDiagram, topic, setTopic, onSav
 
   const copyCode = async () => {
     try {
-      await navigator.clipboard.writeText(diagram.code.content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      if (diagram?.code?.content) {
+        await navigator.clipboard.writeText(diagram.code.content);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }
     } catch (e) {
-      /* clipboard may be unavailable — code is still visible to select manually */
+      /* clipboard may be unavailable */
     }
   };
 
@@ -48,11 +52,13 @@ export default function ExploreTab({ diagram, setDiagram, topic, setTopic, onSav
       saveStudyItem(entry);
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 1800);
-      onSaved();
+      if (onSaved) onSaved();
     } finally {
       setSaving(false);
     }
   };
+
+  const rationaleList = Array.isArray(diagram?.rationale) ? diagram.rationale : [];
 
   return (
     <div>
@@ -88,27 +94,29 @@ export default function ExploreTab({ diagram, setDiagram, topic, setTopic, onSav
         <>
           <div className="flex items-center gap-2 mb-2">
             <span style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }} className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-sm">
-              {TYPE_LABELS[diagram.type] || diagram.type}
+              {(TYPE_LABELS && TYPE_LABELS[diagram.type]) || diagram.type || 'SCHEMA'}
             </span>
-            <h3 style={{ color: TOKENS.paper, fontFamily: "'Fraunces', serif" }} className="font-semibold">{diagram.title}</h3>
+            <h3 style={{ color: TOKENS.paper, fontFamily: "'Fraunces', serif" }} className="font-semibold">{diagram.title || 'Generated Diagram'}</h3>
           </div>
 
           <Diagram diagram={diagram} />
 
-          <div style={{ background: TOKENS.paper }} className="rounded-md p-5 mt-5">
-            <div className="flex items-center gap-1.5 mb-3">
-              <Lightbulb size={15} color={TOKENS.gold} />
-              <h3 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold">Why it's put together this way</h3>
+          {rationaleList.length > 0 && (
+            <div style={{ background: TOKENS.paper }} className="rounded-md p-5 mt-5">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Lightbulb size={15} color={TOKENS.gold} />
+                <h3 style={{ fontFamily: "'Fraunces', serif", color: TOKENS.ink }} className="font-semibold">Why it's put together this way</h3>
+              </div>
+              <ul className="space-y-2">
+                {rationaleList.map((r, i) => (
+                  <li key={i} style={{ color: TOKENS.ink }} className="text-[13px] flex items-start gap-2">
+                    <span style={{ color: TOKENS.gold }} className="font-mono text-xs mt-0.5">{String(i + 1).padStart(2, '0')}</span>
+                    {r}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-2">
-              {diagram.rationale.map((r, i) => (
-                <li key={i} style={{ color: TOKENS.ink }} className="text-[13px] flex items-start gap-2">
-                  <span style={{ color: TOKENS.gold }} className="font-mono text-xs mt-0.5">{String(i + 1).padStart(2, '0')}</span>
-                  {r}
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
 
           {diagram.code && diagram.code.language && (
             <div style={{ background: TOKENS.paper }} className="rounded-md p-5 mt-4">
