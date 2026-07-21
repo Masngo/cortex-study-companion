@@ -3,7 +3,9 @@ const STATS_KEY = 'cortex_practice_stats';
 
 export function getStudyItems() {
   try {
-    return JSON.parse(localStorage.getItem(ITEMS_KEY) || '[]');
+    const data = localStorage.getItem(ITEMS_KEY);
+    const parsed = data ? JSON.parse(data) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
     return [];
   }
@@ -17,13 +19,21 @@ export function saveStudyItem(entry) {
 }
 
 export function deleteStudyItem(id) {
-  const items = getStudyItems().filter((i) => i.id !== id);
+  const items = getStudyItems().filter((i) => i && i.id !== id);
   localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
 }
 
 export function getStats() {
   try {
-    return JSON.parse(localStorage.getItem(STATS_KEY) || '{"correct":0,"incorrect":0}');
+    const data = localStorage.getItem(STATS_KEY);
+    const parsed = data ? JSON.parse(data) : null;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return {
+        correct: typeof parsed.correct === 'number' ? parsed.correct : 0,
+        incorrect: typeof parsed.incorrect === 'number' ? parsed.incorrect : 0,
+      };
+    }
+    return { correct: 0, incorrect: 0 };
   } catch (e) {
     return { correct: 0, incorrect: 0 };
   }
@@ -31,7 +41,8 @@ export function getStats() {
 
 export function recordAnswer(result) {
   const stats = getStats();
-  const next = { ...stats, [result === 'correct' ? 'correct' : 'incorrect']: stats[result === 'correct' ? 'correct' : 'incorrect'] + 1 };
+  const key = result === 'correct' ? 'correct' : 'incorrect';
+  const next = { ...stats, [key]: stats[key] + 1 };
   localStorage.setItem(STATS_KEY, JSON.stringify(next));
   return next;
 }
