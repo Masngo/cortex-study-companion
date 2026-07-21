@@ -1,122 +1,94 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState, useLayoutEffect } from 'react';
+import { Brain } from 'lucide-react';
 import { TOKENS } from '../lib/tokens.js';
+
+function NodeCard({ node, cardRef }) {
+  return (
+    <div
+      ref={cardRef}
+      style={{ background: TOKENS.paper, borderColor: TOKENS.line + '55' }}
+      className="rounded-md border-2 w-64 shadow-lg flex-shrink-0"
+    >
+      <div style={{ background: TOKENS.ink }} className="px-3 py-2 rounded-t-sm flex items-center gap-1.5">
+        <Brain size={13} color={TOKENS.gold} />
+        <span style={{ color: TOKENS.paper, fontFamily: "'JetBrains Mono', monospace" }} className="text-[13px] font-semibold">
+          {node.label}
+        </span>
+      </div>
+      <div className="px-3 py-2 space-y-1">
+        {node.detail.map((d, i) => (
+          <p key={i} style={{ color: TOKENS.ink, fontFamily: "'JetBrains Mono', monospace" }} className="text-[12px] leading-snug">
+            {d}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Diagram({ diagram }) {
   const containerRef = useRef(null);
-  const [nodePositions, setNodePositions] = useState({});
+  const cardRefs = useRef({});
+  const [lines, setLines] = useState([]);
 
-  useEffect(() => {
-    const measure = () => {
-      if (!containerRef.current || !diagram?.nodes) return;
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const positions = {};
-
-      diagram.nodes.forEach((node) => {
-        if (!node) return;
-        const el = document.getElementById(`node-${node.id}`);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          positions[node.id] = {
-            x: rect.left - containerRect.left + rect.width / 2,
-            y: rect.top - containerRect.top + rect.height / 2,
-          };
-        }
-      });
-      setNodePositions(positions);
+  useLayoutEffect(() => {
+    if (!diagram) return;
+    const compute = () => {
+      const containerRect = containerRef.current?.getBoundingClientRect();
+      if (!containerRect) return;
+      const newLines = (diagram.edges || [])
+        .map((e) => {
+          const fromEl = cardRefs.current[e.from];
+          const toEl = cardRefs.current[e.to];
+          if (!fromEl || !toEl) return null;
+          const fr = fromEl.getBoundingClientRect();
+          const tr = toEl.getBoundingClientRect();
+          const x1 = fr.left + fr.width / 2 - containerRect.left;
+          const y1 = fr.top + fr.height / 2 - containerRect.top;
+          const x2 = tr.left + tr.width / 2 - containerRect.left;
+          const y2 = tr.top + tr.height / 2 - containerRect.top;
+          return { key: e.from + '-' + e.to, x1, y1, x2, y2, label: e.label, mx: (x1 + x2) / 2, my: (y1 + y2) / 2 };
+        })
+        .filter(Boolean);
+      setLines(newLines);
     };
-
-    measure();
-    window.addEventListener('resize', measure);
-    const t = setTimeout(measure, 150);
+    const t = setTimeout(compute, 30);
+    window.addEventListener('resize', compute);
     return () => {
-      window.removeEventListener('resize', measure);
       clearTimeout(t);
+      window.removeEventListener('resize', compute);
     };
   }, [diagram]);
 
-  if (!diagram || !diagram.nodes) {
-    return <div className="text-xs font-mono opacity-50 p-4">Invalid or missing structural nodes array framework.</div>;
-  }
-
-  const nodes = diagram.nodes || [];
-  const edges = diagram.edges || [];
-
   return (
-    <div 
-      ref={containerRef} 
-      style={{ background: TOKENS.blueprintDeep, borderColor: TOKENS.line + '33' }} 
-      className="relative w-full rounded-md border p-6 min-h-[400px] overflow-hidden flex flex-wrap gap-6 justify-center items-start"
+    <div
+      ref={containerRef}
+      style={{
+        background: TOKENS.blueprintDeep,
+        backgroundImage: `radial-gradient(${TOKENS.line}22 1px, transparent 1px)`,
+        backgroundSize: '18px 18px',
+      }}
+      className="relative rounded-md p-6 overflow-auto"
     >
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="18" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" fill={TOKENS.line} opacity="0.6" />
-          </marker>
-        </defs>
-        {edges.map((edge, i) => {
-          if (!edge || !edge.from || !edge.to) return null;
-          const fromPos = nodePositions[edge.from];
-          const toPos = nodePositions[edge.to];
-          if (!fromPos || !toPos) return null;
-
-          return (
-            <g key={i}>
-              <line
-                x1={fromPos.x}
-                y1={fromPos.y}
-                x2={toPos.x}
-                y2={toPos.y}
-                stroke={TOKENS.line}
-                strokeWidth="2"
-                strokeDasharray={diagram.type === 'concept_map' ? '4 4' : '0'}
-                opacity="0.5"
-                markerEnd="url(#arrow)"
-              />
-              {edge.label && (
-                <text
-                  x={(fromPos.x + toPos.x) / 2}
-                  y={(fromPos.y + toPos.y) / 2 - 4}
-                  fill="#ffffff88"
-                  fontSize="10"
-                  fontFamily="monospace"
-                  textAnchor="middle"
-                >
-                  {edge.label}
-                </text>
-              )}
-            </g>
-          );
-        })}
+      <svg className="absolute inset-0 pointer-events-none" style={{ width: '100%', height: '100%' }}>
+        {lines.map((l) => (
+          <g key={l.key}>
+            <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={TOKENS.line} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
+            <circle cx={l.x1} cy={l.y1} r="3" fill={TOKENS.line} />
+            <circle cx={l.x2} cy={l.y2} r="3" fill={TOKENS.line} />
+            {l.label && (
+              <text x={l.mx} y={l.my - 4} fill={TOKENS.gold} fontSize="10" textAnchor="middle" fontFamily="'JetBrains Mono', monospace">
+                {l.label}
+              </text>
+            )}
+          </g>
+        ))}
       </svg>
-
-      {nodes.map((node) => {
-        if (!node) return null;
-        return (
-          <div
-            key={node.id}
-            id={`node-${node.id}`}
-            style={{ 
-              background: TOKENS.paper, 
-              color: TOKENS.ink,
-              borderLeft: `4px solid ${diagram.type === 'schema' ? TOKENS.gold : TOKENS.line}`
-            }}
-            className="relative z-10 w-64 rounded-sm shadow-xl p-3 text-xs flex flex-col space-y-2 transition-transform hover:scale-[1.01]"
-          >
-            <div className="font-bold tracking-tight border-b pb-1 flex justify-between items-center" style={{ borderColor: '#0000000a' }}>
-              <span className="uppercase text-[11px] truncate">{node.label || 'Component'}</span>
-              <span className="text-[9px] opacity-40 font-mono">#{node.id}</span>
-            </div>
-            <ul className="space-y-1 list-none pl-0 m-0 text-slate-700">
-              {node.detail && node.detail.map((bullet, idx) => (
-                <li key={idx} className="leading-relaxed flex items-start gap-1">
-                  <span className="text-amber-500 font-bold select-none">•</span>
-                  <span>{bullet}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
+      <div className="flex flex-wrap gap-8 relative" style={{ zIndex: 1 }}>
+        {diagram.nodes.map((n) => (
+          <NodeCard key={n.id} node={n} cardRef={(el) => (cardRefs.current[n.id] = el)} />
+        ))}
+      </div>
     </div>
   );
 }

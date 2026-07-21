@@ -10,17 +10,16 @@ app.use(express.json({ limit: '2mb' }));
 
 // POST /api/generate
 // body: { system: string, prompt: string, maxTokens?: number }
-// Calls OpenAI's GPT-5.6 and returns { text: string } — the frontend parses
-// that text as JSON itself. No mock/fallback data: if the AI call fails,
-// the frontend shows a real error instead of fake output.
+// Proxies to OpenAI's chat completions endpoint using GPT-5.6, so the API
+// key never reaches the browser. Returns { text: string }.
 app.post('/api/generate', async (req, res) => {
   const { system, prompt, maxTokens } = req.body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Missing "prompt" in request body' });
   }
-  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.includes('your-openai')) {
-    return res.status(500).json({ error: 'OPENAI_API_KEY is not set in .env' });
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'OPENAI_API_KEY is not set on the server (see .env.example)' });
   }
 
   try {
@@ -31,6 +30,9 @@ app.post('/api/generate', async (req, res) => {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
+        // NOTE: confirm the exact model identifier string in OpenAI's docs
+        // at build time — "gpt-5.6" is the model name as referenced by the
+        // hackathon; API model slugs occasionally differ from marketing names.
         model: process.env.OPENAI_MODEL || 'gpt-5.6',
         max_tokens: maxTokens || 1800,
         messages: [
@@ -43,7 +45,7 @@ app.post('/api/generate', async (req, res) => {
     if (!response.ok) {
       const errText = await response.text();
       console.error('OpenAI API error:', response.status, errText);
-      return res.status(502).json({ error: 'Upstream AI request failed', detail: errText });
+      return res.status(502).json({ error: 'Upstream AI request failed' });
     }
 
     const data = await response.json();
