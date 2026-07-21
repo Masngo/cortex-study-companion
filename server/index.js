@@ -9,126 +9,135 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
+ * Smart Fallback for Practice Questions & Quizzes
+ */
+function generatePracticeFallback(topic = '') {
+  const t = topic.toLowerCase();
+
+  // TCP / Networking Practice Questions
+  if (t.includes('tcp') || t.includes('handshake') || t.includes('network')) {
+    return JSON.stringify({
+      topic: topic,
+      questions: [
+        {
+          id: 'q1',
+          question: 'What is the primary purpose of the initial SYN packet in a TCP 3-way handshake?',
+          options: [
+            'To synchronize sequence numbers and initiate a connection request',
+            'To immediately transfer encrypted payload data',
+            'To terminate an existing TCP session gracefully',
+            'To calculate network bandwidth latency'
+          ],
+          answer: 'To synchronize sequence numbers and initiate a connection request',
+          explanation: 'The SYN (Synchronize) packet informs the receiver of the sender\'s initial sequence number (ISN) to establish packet ordering.'
+        },
+        {
+          id: 'q2',
+          question: 'What response does the server send back upon receiving a SYN flag?',
+          options: [
+            'ACK only',
+            'SYN-ACK',
+            'FIN-ACK',
+            'RST'
+          ],
+          answer: 'SYN-ACK',
+          explanation: 'The server acknowledges the client\'s SYN by incrementing its sequence number and sending its own SYN flag back simultaneously (SYN-ACK).'
+        }
+      ]
+    });
+  }
+
+  // Generic Practice Questions Fallback for any topic
+  return JSON.stringify({
+    topic: topic,
+    questions: [
+      {
+        id: 'q1',
+        question: `What is the core underlying concept of ${topic || 'this subject'}?`,
+        options: [
+          'Modular structural decomposition and systematic processing',
+          'Randomized unstructured data storage',
+          'Single-threaded execution without feedback mechanisms',
+          'Manual memory allocation without boundaries'
+        ],
+        answer: 'Modular structural decomposition and systematic processing',
+        explanation: 'Breaking complex processes into modular steps ensures reliability, maintainability, and clear execution bounds.'
+      },
+      {
+        id: 'q2',
+        question: `Why is relationship normalization/mapping critical in ${topic || 'this domain'}?`,
+        options: [
+          'It eliminates data redundancy and enforces integrity',
+          'It increases latency across network boundaries',
+          'It forces all state to be volatile',
+          'It disables user access controls'
+        ],
+        answer: 'It eliminates data redundancy and enforces integrity',
+        explanation: 'Normalization prevents duplicate entries and ensures changes to data elements propagate consistently.'
+      }
+    ]
+  });
+}
+
+/**
  * Universal Educational & Technical Fallback Engine
- * Generates tailored diagrams, rationales, and code across all educational domains.
  */
 function generateUniversalDiagram(prompt = '') {
   const query = prompt.toLowerCase();
 
-  // ---------------------------------------------------------------------------
   // 1. MACHINE LEARNING, AI & DATA SCIENCE
-  // ---------------------------------------------------------------------------
   if (query.includes('random forest') || query.includes('predict') || query.includes('classification') || query.includes('regression') || query.includes('machine learning') || query.includes('model') || query.includes('neural')) {
     return JSON.stringify({
       title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Pipeline`,
       type: "process",
       nodes: [
-        { id: "data_ingest", label: "1. Data Collection & Ingestion", detail: ["Feature Extraction", "Handling Missing Data", "Target Variable Definition"] },
-        { id: "preprocessing", label: "2. Preprocessing & Scaling", detail: ["Train/Test Split (80/20)", "Feature Normalization", "Encoding Categorical Variables"] },
-        { id: "model_training", label: "3. Model Training & Tuning", detail: ["Ensemble/Model Selection", "Hyperparameter Optimization", "Cross-Validation"] },
-        { id: "evaluation", label: "4. Evaluation & Inference", detail: ["Accuracy / R² Score / RMSE", "Feature Importance Analysis", "Model Prediction Output"] }
+        { id: "data_ingest", label: "1. Data Collection", detail: ["Feature Extraction", "Target Variable Definition"] },
+        { id: "preprocessing", label: "2. Preprocessing", detail: ["Train/Test Split", "Feature Normalization"] },
+        { id: "model_training", label: "3. Model Training", detail: ["Ensemble Selection", "Cross-Validation"] },
+        { id: "evaluation", label: "4. Evaluation", detail: ["Accuracy / RMSE", "Feature Importance Analysis"] }
       ],
       edges: [
         { from: "data_ingest", to: "preprocessing", label: "raw dataset" },
         { from: "preprocessing", to: "model_training", label: "scaled features" },
         { from: "model_training", to: "evaluation", label: "trained model" }
       ],
-      rationale: [
-        "Isolates feature engineering from model evaluation to prevent data leakage.",
-        "Evaluates performance metrics across test sets to ensure generalization.",
-        "Ranks feature importances to highlight primary predictive drivers."
-      ],
-      code: {
-        language: "python",
-        content: `# Machine Learning Pipeline Example\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.metrics import mean_squared_error\n\n# 1. Load Data & Prepare Features\nX = pd.DataFrame({'feature_1': np.random.rand(100), 'feature_2': np.random.rand(100)})\ny = np.random.rand(100)\n\n# 2. Split Data\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# 3. Model Training\nmodel = RandomForestRegressor(n_estimators=100, random_state=42)\nmodel.fit(X_train, y_train)\n\n# 4. Predict & Evaluate\npredictions = model.predict(X_test)\nprint("RMSE:", mean_squared_error(y_test, predictions, squared=False))`
-      }
+      rationale: ["Isolates feature engineering from model evaluation to prevent data leakage."],
+      code: { language: "python", content: `# Model Training snippet\nimport sklearn` }
     });
   }
 
-  // ---------------------------------------------------------------------------
   // 2. BIOLOGY, ECOLOGY & NATURAL SCIENCES
-  // ---------------------------------------------------------------------------
-  if (query.includes('water cycle') || query.includes('photosynthesis') || query.includes('cell') || query.includes('biology') || query.includes('ecosystem') || query.includes('dna') || query.includes('mitosis')) {
+  if (query.includes('water cycle') || query.includes('photosynthesis') || query.includes('cell') || query.includes('biology')) {
     return JSON.stringify({
       title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Process Diagram`,
       type: "process",
       nodes: [
-        { id: "stage1", label: "Stage 1: Primary Inputs", detail: ["Absorption of Solar Energy", "Ingestion of Raw Elements", "Initial Catalyst Activation"] },
-        { id: "stage2", label: "Stage 2: Cellular Transformation", detail: ["Chemical Conversion Reactions", "Energy Transfer (ATP / Synthesis)", "Intermediate Byproducts"] },
-        { id: "stage3", label: "Stage 3: Output & Biomass", detail: ["Release of Gases / Yields", "Energy Storage", "System Balance Maintenance"] }
+        { id: "stage1", label: "Stage 1: Primary Inputs", detail: ["Absorption of Energy", "Initial Catalyst"] },
+        { id: "stage2", label: "Stage 2: Transformation", detail: ["Chemical Reactions", "Energy Transfer"] },
+        { id: "stage3", label: "Stage 3: Output", detail: ["Release of Yields", "System Balance"] }
       ],
-      edges: [
-        { from: "stage1", to: "stage2", label: "triggers reaction" },
-        { from: "stage2", to: "stage3", label: "yields end product" }
-      ],
-      rationale: [
-        "Maps thermodynamic energy transfer across biological subsystems.",
-        "Demonstrates conservation of mass and energy through biological feedback loops."
-      ],
-      code: {
-        language: "text",
-        content: `# Chemical Balance Equation Representation\nInputs: 6CO2 + 6H2O + Light Energy\nTransform: Chlorophyll Enzymatic Reactions\nOutputs: C6H12O6 (Glucose) + 6O2`
-      }
+      edges: [{ from: "stage1", to: "stage2", label: "triggers" }, { from: "stage2", to: "stage3", label: "yields" }],
+      rationale: ["Demonstrates conservation of mass and energy through biological feedback loops."],
+      code: { language: "text", content: `# Reaction representation` }
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // 3. COMPUTER NETWORKING, PROTOCOLS & SECURITY
-  // ---------------------------------------------------------------------------
-  if (query.includes('tcp') || query.includes('handshake') || query.includes('network') || query.includes('oauth') || query.includes('http') || query.includes('dns') || query.includes('security')) {
-    return JSON.stringify({
-      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Flow`,
-      type: "process",
-      nodes: [
-        { id: "client_req", label: "1. Client Request Ingestion", detail: ["Initiates Connection / Payload", "Includes Security Tokens / Headers", "State: Pending"] },
-        { id: "server_ack", label: "2. Server Handshake & Verification", detail: ["Validates Credentials / Flags", "Allocates Connection Resources", "Sends Response Acknowledgment"] },
-        { id: "established", label: "3. Secure Session Established", detail: ["Bidirectional Data Stream", "Enforces Encryption Protocols", "State: Established"] }
-      ],
-      edges: [
-        { from: "client_req", to: "server_ack", label: "sends SYN / Request" },
-        { from: "server_ack", to: "established", label: "returns SYN-ACK / Verification" }
-      ],
-      rationale: [
-        "Guarantees message integrity before processing high-privilege payloads.",
-        "Establishes initial sequence numbers to manage packet ordering."
-      ],
-      code: {
-        language: "python",
-        content: `# Python Socket Connection Example\nimport socket\n\nclient = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\nclient.connect(("localhost", 8080))\nclient.sendall(b"Hello Server")\nresponse = client.recv(1024)\nprint("Received:", response.decode())\nclient.close()`
-      }
-    });
-  }
-
-  // ---------------------------------------------------------------------------
-  // 4. DATABASE SCHEMAS & SYSTEM ARCHITECTURE
-  // ---------------------------------------------------------------------------
-  if (query.includes('database') || query.includes('sql') || query.includes('schema') || query.includes('hospital') || query.includes('library') || query.includes('table')) {
+  // 3. DATABASE SCHEMAS & SYSTEM ARCHITECTURE
+  if (query.includes('database') || query.includes('sql') || query.includes('schema') || query.includes('hospital') || query.includes('table')) {
     return JSON.stringify({
       title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Schema`,
       type: "schema",
       nodes: [
-        { id: "entity1", label: "Core Primary Entity", detail: ["Entity_ID (PK)", "Name / Identifier", "Attributes", "Created_At"] },
-        { id: "entity2", label: "Transactional Bridge Entity", detail: ["Tx_ID (PK)", "Entity1_ID (FK)", "Entity3_ID (FK)", "Status"] },
-        { id: "entity3", label: "Supporting Lookup Entity", detail: ["Lookup_ID (PK)", "Category_Name", "Description"] }
+        { id: "entity1", label: "Primary Entity", detail: ["Entity_ID (PK)", "Created_At"] },
+        { id: "entity2", label: "Transactional Bridge", detail: ["Tx_ID (PK)", "Entity1_ID (FK)", "Status"] }
       ],
-      edges: [
-        { from: "entity1", to: "entity2", label: "initiates" },
-        { from: "entity3", to: "entity2", label: "categorizes" }
-      ],
-      rationale: [
-        "Complies with Third Normal Form (3NF) to minimize data redundancy.",
-        "Uses explicit Foreign Key constraints to maintain referential integrity."
-      ],
-      code: {
-        language: "sql",
-        content: `-- Relational Schema SQL Structure\nCREATE TABLE Primary_Entity (\n  Entity_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Created_At TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE Transaction_Log (\n  Tx_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Entity_ID INT NOT NULL,\n  Status VARCHAR(50) DEFAULT 'Active',\n  FOREIGN KEY (Entity_ID) REFERENCES Primary_Entity(Entity_ID) ON DELETE CASCADE\n);`
-      }
+      edges: [{ from: "entity1", to: "entity2", label: "initiates" }],
+      rationale: ["Complies with Third Normal Form (3NF)."],
+      code: { language: "sql", content: `CREATE TABLE Primary_Entity (Entity_ID INT PRIMARY KEY);` }
     });
   }
 
-  // ---------------------------------------------------------------------------
-  // 5. GENERAL EDUCATIONAL / ALGORITHMIC / OTHER SUBJECTS
-  // ---------------------------------------------------------------------------
+  // 4. GENERAL EDUCATIONAL SUBJECTS
   const cleanTitle = prompt.trim() ? prompt.slice(0, 40) : 'Study Topic';
   const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
 
@@ -136,22 +145,13 @@ function generateUniversalDiagram(prompt = '') {
     title: `${formattedTitle} Conceptual Breakdown`,
     type: "process",
     nodes: [
-      { id: "foundations", label: "1. Core Principles & Inputs", detail: ["Fundamental Definitions", "Prerequisite Knowledge", "Initial System Inputs"] },
-      { id: "transformation", label: "2. Analysis & Transformations", detail: ["Core Logic Application", "Rule Execution", "Data / Concept Structuring"] },
-      { id: "synthesis", label: "3. Synthesis & Real-World Application", detail: ["Final Outcomes & Solutions", "Performance & Impact Metrics", "Practical Integration"] }
+      { id: "foundations", label: "1. Core Principles", detail: ["Fundamental Definitions", "Inputs"] },
+      { id: "transformation", label: "2. Analysis", detail: ["Core Logic Application", "Structuring"] },
+      { id: "synthesis", label: "3. Synthesis", detail: ["Final Outcomes", "Impact Metrics"] }
     ],
-    edges: [
-      { from: "foundations", to: "transformation", label: "applies principles to" },
-      { from: "transformation", to: "synthesis", label: "yields actionable outcome" }
-    ],
-    rationale: [
-      "Breaks down complex academic subjects into sequential, manageable concepts.",
-      "Connects theoretical principles directly to practical, real-world outputs."
-    ],
-    code: {
-      language: "python",
-      content: `# Python Algorithmic Concept Blueprint for ${formattedTitle}\ndef analyze_topic(inputs):\n    # 1. Process foundational parameters\n    processed_inputs = [x.strip() for x in inputs if x]\n    \n    # 2. Execute core logic\n    analysis_result = {"status": "success", "processed_count": len(processed_inputs)}\n    \n    # 3. Output results\n    return analysis_result\n\nprint(analyze_topic(["Concept A", "Concept B"]))`
-    }
+    edges: [{ from: "foundations", to: "transformation", label: "applies to" }, { from: "transformation", to: "synthesis", label: "yields" }],
+    rationale: ["Breaks down complex subjects into sequential concepts."],
+    code: { language: "python", content: `# Blueprint implementation` }
   });
 }
 
@@ -163,9 +163,15 @@ app.post('/api/generate', async (req, res) => {
     return res.status(400).json({ error: 'Missing "prompt" in request body' });
   }
 
+  // Detect if the request is asking for practice questions
+  const isPracticeRequest = 
+    (system && (system.toLowerCase().includes('question') || system.toLowerCase().includes('practice') || system.toLowerCase().includes('quiz'))) ||
+    (prompt && (prompt.toLowerCase().includes('question') || prompt.toLowerCase().includes('quiz')));
+
   // Use local fallback directly if key is missing or invalid
   if (!process.env.OPENAI_API_KEY) {
-    return res.json({ text: generateUniversalDiagram(prompt) });
+    const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
+    return res.json({ text: fallbackText });
   }
 
   try {
@@ -181,15 +187,16 @@ app.post('/api/generate', async (req, res) => {
         model: modelName,
         max_tokens: maxTokens || 1800,
         messages: [
-          { role: 'system', content: system || 'Return complete JSON with diagram nodes, edges, rationale, and code snippet.' },
+          { role: 'system', content: system || 'Return JSON payload.' },
           { role: 'user', content: prompt },
         ],
       }),
     });
 
     if (!response.ok) {
-      console.error('OpenAI API Quota/Error (Using Universal Fallback):', response.status);
-      return res.json({ text: generateUniversalDiagram(prompt) });
+      console.error('OpenAI API Quota/Error:', response.status);
+      const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
+      return res.json({ text: fallbackText });
     }
 
     const data = await response.json();
@@ -199,8 +206,9 @@ app.post('/api/generate', async (req, res) => {
     res.json({ text: cleanText });
 
   } catch (err) {
-    console.error('Server error (Using Universal Fallback):', err.message);
-    res.json({ text: generateUniversalDiagram(prompt) });
+    console.error('Server error:', err.message);
+    const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
+    res.json({ text: fallbackText });
   }
 });
 
