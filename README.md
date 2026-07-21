@@ -116,9 +116,14 @@ Here is Cortex in action generating schemas and runnable SQL for different syste
 <img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/a9f6128e-36cc-42fa-ad19-02990fa65385" />
 
 
-
 **4. Church System Architecture & Schema**
 
 <img width="1912" height="958" alt="image" src="https://github.com/user-attachments/assets/ea9eed52-49bb-419b-8890-8fcd0b5b4615" />
+
+**4.Farm Management System Architecture & Schema**
+
+
+<img width="953" height="485" alt="cortex_app_dashboard7" src="https://github.com/user-attachments/assets/d5805a95-13cc-4e37-8daa-b898b81d8041" />
+
  
 
