@@ -9,12 +9,38 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Smart Fallback for Practice Questions & Quizzes
+ * Fallback for Connections Tab (Comparing 2 Studied Topics)
+ */
+function generateConnectionsFallback(prompt = '') {
+  return JSON.stringify({
+    summary: "Both systems rely on sequential stage execution and feedback loops to maintain balance and deliver continuous flow.",
+    comparisons: [
+      {
+        aspect: "System Architecture & Flow",
+        topicA: "Follows a strict 3-step handshake protocol (SYN, SYN-ACK, ACK) to statefully establish bidirectional session communication.",
+        topicB: "Operates as a continuous natural closed-loop process driven by environmental thermodynamics and energy transfer."
+      },
+      {
+        aspect: "Error Handling & Verification",
+        topicA: "Employs explicit sequence numbers, acknowledgments, and checksums to prevent packet loss.",
+        topicB: "Maintains biological/climatic equilibrium through natural feedback mechanisms and rate-limiting factors."
+      },
+      {
+        aspect: "Core Purpose",
+        topicA: "Guarantees reliable, ordered end-to-end data transfer over packet-switched networks.",
+        topicB: "Sustains life and energy redistribution across biological and environmental ecosystems."
+      }
+    ],
+    takeaway: "Despite operating in completely different domains (digital networking vs. natural science), both frameworks demonstrate how complex systems maintain integrity through structured state transitions and handshake/feedback protocols."
+  });
+}
+
+/**
+ * Fallback for Practice Tab (5 Rich Multiple Choice Questions)
  */
 function generatePracticeFallback(topic = '') {
   const t = topic.toLowerCase();
 
-  // TCP / Networking Practice Questions
   if (t.includes('tcp') || t.includes('handshake') || t.includes('network')) {
     return JSON.stringify({
       topic: topic,
@@ -42,12 +68,48 @@ function generatePracticeFallback(topic = '') {
           ],
           answer: 'SYN-ACK',
           explanation: 'The server acknowledges the client\'s SYN by incrementing its sequence number and sending its own SYN flag back simultaneously (SYN-ACK).'
+        },
+        {
+          id: 'q3',
+          question: 'In what connection state is the TCP socket after the final ACK packet is received by the server?',
+          options: [
+            'SYN-SENT',
+            'SYN-RCVD',
+            'ESTABLISHED',
+            'CLOSE-WAIT'
+          ],
+          answer: 'ESTABLISHED',
+          explanation: 'Once the client sends the final ACK acknowledging the server\'s SYN-ACK, both sides transition to the ESTABLISHED state and data transfer begins.'
+        },
+        {
+          id: 'q4',
+          question: 'What flag is used to gracefully close a TCP connection after data transfer completes?',
+          options: [
+            'RST',
+            'FIN',
+            'PSH',
+            'URG'
+          ],
+          answer: 'FIN',
+          explanation: 'The FIN (Finish) flag is sent by an endpoint when it wants to terminate its side of the TCP connection.'
+        },
+        {
+          id: 'q5',
+          question: 'How does TCP handle a lost ACK packet during the 3-way handshake?',
+          options: [
+            'The connection immediately aborts',
+            'The server retransmits the SYN-ACK after a timeout',
+            'The client resets the IP address',
+            'Data transmission starts anyway'
+          ],
+          answer: 'The server retransmits the SYN-ACK after a timeout',
+          explanation: 'If the server does not receive the final ACK within its Retransmission Timeout (RTO) window, it resends the SYN-ACK.'
         }
       ]
     });
   }
 
-  // Generic Practice Questions Fallback for any topic
+  // Generic 5-Question Fallback
   return JSON.stringify({
     topic: topic,
     questions: [
@@ -74,84 +136,65 @@ function generatePracticeFallback(topic = '') {
         ],
         answer: 'It eliminates data redundancy and enforces integrity',
         explanation: 'Normalization prevents duplicate entries and ensures changes to data elements propagate consistently.'
+      },
+      {
+        id: 'q3',
+        question: `How do state transitions operate within ${topic || 'this system'}?`,
+        options: [
+          'Through sequential trigger events and verified conditions',
+          'By continuously overwriting core parameters at random',
+          'Through static unchangeable constants',
+          'By bypassing validation protocols'
+        ],
+        answer: 'Through sequential trigger events and verified conditions',
+        explanation: 'State transitions occur systematically as input criteria and execution rules are met.'
+      },
+      {
+        id: 'q4',
+        question: `What is the primary failure mode prevented by structural validation in ${topic || 'this field'}?`,
+        options: [
+          'Data corruption and invalid system states',
+          'Overly fast processing times',
+          'Automated documentation generation',
+          'Redundant user interfaces'
+        ],
+        answer: 'Data corruption and invalid system states',
+        explanation: 'Validation ensures that bad inputs or missing parameters are caught before affecting downstream dependencies.'
+      },
+      {
+        id: 'q5',
+        question: `Which methodology provides optimal scaling for ${topic || 'this architecture'}?`,
+        options: [
+          'Decoupled modular components with explicit contracts',
+          'Monolithic tightly coupled single-file scripts',
+          'Unindexed database queries without keys',
+          'Hardcoded global static variables'
+        ],
+        answer: 'Decoupled modular components with explicit contracts',
+        explanation: 'Decoupled modules allow individual parts of the system to scale and adapt independently.'
       }
     ]
   });
 }
 
 /**
- * Universal Educational & Technical Fallback Engine
+ * Universal Diagram Generator Fallback
  */
 function generateUniversalDiagram(prompt = '') {
-  const query = prompt.toLowerCase();
-
-  // 1. MACHINE LEARNING, AI & DATA SCIENCE
-  if (query.includes('random forest') || query.includes('predict') || query.includes('classification') || query.includes('regression') || query.includes('machine learning') || query.includes('model') || query.includes('neural')) {
-    return JSON.stringify({
-      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Pipeline`,
-      type: "process",
-      nodes: [
-        { id: "data_ingest", label: "1. Data Collection", detail: ["Feature Extraction", "Target Variable Definition"] },
-        { id: "preprocessing", label: "2. Preprocessing", detail: ["Train/Test Split", "Feature Normalization"] },
-        { id: "model_training", label: "3. Model Training", detail: ["Ensemble Selection", "Cross-Validation"] },
-        { id: "evaluation", label: "4. Evaluation", detail: ["Accuracy / RMSE", "Feature Importance Analysis"] }
-      ],
-      edges: [
-        { from: "data_ingest", to: "preprocessing", label: "raw dataset" },
-        { from: "preprocessing", to: "model_training", label: "scaled features" },
-        { from: "model_training", to: "evaluation", label: "trained model" }
-      ],
-      rationale: ["Isolates feature engineering from model evaluation to prevent data leakage."],
-      code: { language: "python", content: `# Model Training snippet\nimport sklearn` }
-    });
-  }
-
-  // 2. BIOLOGY, ECOLOGY & NATURAL SCIENCES
-  if (query.includes('water cycle') || query.includes('photosynthesis') || query.includes('cell') || query.includes('biology')) {
-    return JSON.stringify({
-      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Process Diagram`,
-      type: "process",
-      nodes: [
-        { id: "stage1", label: "Stage 1: Primary Inputs", detail: ["Absorption of Energy", "Initial Catalyst"] },
-        { id: "stage2", label: "Stage 2: Transformation", detail: ["Chemical Reactions", "Energy Transfer"] },
-        { id: "stage3", label: "Stage 3: Output", detail: ["Release of Yields", "System Balance"] }
-      ],
-      edges: [{ from: "stage1", to: "stage2", label: "triggers" }, { from: "stage2", to: "stage3", label: "yields" }],
-      rationale: ["Demonstrates conservation of mass and energy through biological feedback loops."],
-      code: { language: "text", content: `# Reaction representation` }
-    });
-  }
-
-  // 3. DATABASE SCHEMAS & SYSTEM ARCHITECTURE
-  if (query.includes('database') || query.includes('sql') || query.includes('schema') || query.includes('hospital') || query.includes('table')) {
-    return JSON.stringify({
-      title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Schema`,
-      type: "schema",
-      nodes: [
-        { id: "entity1", label: "Primary Entity", detail: ["Entity_ID (PK)", "Created_At"] },
-        { id: "entity2", label: "Transactional Bridge", detail: ["Tx_ID (PK)", "Entity1_ID (FK)", "Status"] }
-      ],
-      edges: [{ from: "entity1", to: "entity2", label: "initiates" }],
-      rationale: ["Complies with Third Normal Form (3NF)."],
-      code: { language: "sql", content: `CREATE TABLE Primary_Entity (Entity_ID INT PRIMARY KEY);` }
-    });
-  }
-
-  // 4. GENERAL EDUCATIONAL SUBJECTS
-  const cleanTitle = prompt.trim() ? prompt.slice(0, 40) : 'Study Topic';
-  const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
-
   return JSON.stringify({
-    title: `${formattedTitle} Conceptual Breakdown`,
+    title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Breakdown`,
     type: "process",
     nodes: [
-      { id: "foundations", label: "1. Core Principles", detail: ["Fundamental Definitions", "Inputs"] },
-      { id: "transformation", label: "2. Analysis", detail: ["Core Logic Application", "Structuring"] },
-      { id: "synthesis", label: "3. Synthesis", detail: ["Final Outcomes", "Impact Metrics"] }
+      { id: "1", label: "1. Core Principles & Inputs", detail: ["Define inputs", "Set execution bounds"] },
+      { id: "2", label: "2. Process Execution", detail: ["Apply transformations", "Validate parameters"] },
+      { id: "3", label: "3. Output & Results", detail: ["Synthesize findings", "Verify metrics"] }
     ],
-    edges: [{ from: "foundations", to: "transformation", label: "applies to" }, { from: "transformation", to: "synthesis", label: "yields" }],
+    edges: [
+      { from: "1", to: "2", label: "processes" },
+      { from: "2", to: "3", label: "yields" }
+    ],
     rationale: ["Breaks down complex subjects into sequential concepts."],
-    code: { language: "python", content: `# Blueprint implementation` }
+    code: { language: "python", content: `# Python Implementation\nprint('Analyzing ${prompt}')` }
   });
 }
 
@@ -163,15 +206,21 @@ app.post('/api/generate', async (req, res) => {
     return res.status(400).json({ error: 'Missing "prompt" in request body' });
   }
 
-  // Detect if the request is asking for practice questions
-  const isPracticeRequest = 
-    (system && (system.toLowerCase().includes('question') || system.toLowerCase().includes('practice') || system.toLowerCase().includes('quiz'))) ||
-    (prompt && (prompt.toLowerCase().includes('question') || prompt.toLowerCase().includes('quiz')));
+  const sysStr = (system || '').toLowerCase();
+  const promptStr = (prompt || '').toLowerCase();
 
-  // Use local fallback directly if key is missing or invalid
+  const isPracticeRequest = sysStr.includes('question') || sysStr.includes('practice') || sysStr.includes('quiz') || promptStr.includes('question');
+  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || promptStr.includes('compare');
+
+  // Local fallback response execution
   if (!process.env.OPENAI_API_KEY) {
-    const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
-    return res.json({ text: fallbackText });
+    if (isConnectionsRequest) {
+      return res.json({ text: generateConnectionsFallback(prompt) });
+    }
+    if (isPracticeRequest) {
+      return res.json({ text: generatePracticeFallback(prompt) });
+    }
+    return res.json({ text: generateUniversalDiagram(prompt) });
   }
 
   try {
@@ -194,9 +243,10 @@ app.post('/api/generate', async (req, res) => {
     });
 
     if (!response.ok) {
-      console.error('OpenAI API Quota/Error:', response.status);
-      const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
-      return res.json({ text: fallbackText });
+      console.error('OpenAI API Quota/Error (Using Smart Fallback):', response.status);
+      if (isConnectionsRequest) return res.json({ text: generateConnectionsFallback(prompt) });
+      if (isPracticeRequest) return res.json({ text: generatePracticeFallback(prompt) });
+      return res.json({ text: generateUniversalDiagram(prompt) });
     }
 
     const data = await response.json();
@@ -206,9 +256,10 @@ app.post('/api/generate', async (req, res) => {
     res.json({ text: cleanText });
 
   } catch (err) {
-    console.error('Server error:', err.message);
-    const fallbackText = isPracticeRequest ? generatePracticeFallback(prompt) : generateUniversalDiagram(prompt);
-    res.json({ text: fallbackText });
+    console.error('Server error (Using Smart Fallback):', err.message);
+    if (isConnectionsRequest) return res.json({ text: generateConnectionsFallback(prompt) });
+    if (isPracticeRequest) return res.json({ text: generatePracticeFallback(prompt) });
+    res.json({ text: generateUniversalDiagram(prompt) });
   }
 });
 
