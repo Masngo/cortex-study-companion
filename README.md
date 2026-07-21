@@ -121,6 +121,8 @@ Here is Cortex in action generating schemas and runnable SQL for different syste
 <img width="959" height="481" alt="cortex comparison" src="https://github.com/user-attachments/assets/76cccca4-a936-4903-a8e0-8513480b8fcd" />
 
 
+
+
 **4.Farm Management System Architecture & Schema**
 
 
