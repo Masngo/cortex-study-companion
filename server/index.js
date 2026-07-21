@@ -9,30 +9,34 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Fallback for Connections Tab (Comparing 2 Studied Topics)
+ * Fallback for Connections Tab (Returns formatted Markdown text directly)
  */
 function generateConnectionsFallback(prompt = '') {
-  return JSON.stringify({
-    summary: "Both systems rely on sequential stage execution and feedback loops to maintain balance and deliver continuous flow.",
-    comparisons: [
-      {
-        aspect: "System Architecture & Flow",
-        topicA: "Follows a strict 3-step handshake protocol (SYN, SYN-ACK, ACK) to statefully establish bidirectional session communication.",
-        topicB: "Operates as a continuous natural closed-loop process driven by environmental thermodynamics and energy transfer."
-      },
-      {
-        aspect: "Error Handling & Verification",
-        topicA: "Employs explicit sequence numbers, acknowledgments, and checksums to prevent packet loss.",
-        topicB: "Maintains biological/climatic equilibrium through natural feedback mechanisms and rate-limiting factors."
-      },
-      {
-        aspect: "Core Purpose",
-        topicA: "Guarantees reliable, ordered end-to-end data transfer over packet-switched networks.",
-        topicB: "Sustains life and energy redistribution across biological and environmental ecosystems."
-      }
-    ],
-    takeaway: "Despite operating in completely different domains (digital networking vs. natural science), both frameworks demonstrate how complex systems maintain integrity through structured state transitions and handshake/feedback protocols."
-  });
+  return `### Structural Synthesis & Systemic Comparison
+
+**Core Overview:**
+Both systems rely on sequential stage execution, state transitions, and feedback loops to maintain system balance and deliver continuous, reliable flow.
+
+---
+
+### Key Comparison Dimensions
+
+1. **System Architecture & Flow**
+   - **Topic A:** Follows a strict 3-step handshake protocol (SYN, SYN-ACK, ACK) to statefully establish bidirectional session communication across digital networks.
+   - **Topic B:** Operates as a continuous natural closed-loop process driven by environmental thermodynamics and biological energy transfer.
+
+2. **Error Handling & Verification**
+   - **Topic A:** Employs explicit sequence numbers, acknowledgments, and checksums to prevent packet loss or corrupted state.
+   - **Topic B:** Maintains biological/climatic equilibrium through natural feedback mechanisms and rate-limiting environmental constraints.
+
+3. **Core Operational Purpose**
+   - **Topic A:** Guarantees reliable, ordered end-to-end data transfer over packet-switched networks.
+   - **Topic B:** Sustains life and energy redistribution across biological and environmental ecosystems.
+
+---
+
+**Key Takeaway:**
+Despite operating in completely different domains (digital networking vs. natural science), both frameworks demonstrate how complex systems maintain operational integrity through structured state transitions, handshakes, and feedback protocols.`;
 }
 
 /**
@@ -109,7 +113,6 @@ function generatePracticeFallback(topic = '') {
     });
   }
 
-  // Generic 5-Question Fallback
   return JSON.stringify({
     topic: topic,
     questions: [
@@ -210,7 +213,7 @@ app.post('/api/generate', async (req, res) => {
   const promptStr = (prompt || '').toLowerCase();
 
   const isPracticeRequest = sysStr.includes('question') || sysStr.includes('practice') || sysStr.includes('quiz') || promptStr.includes('question');
-  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || promptStr.includes('compare');
+  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || sysStr.includes('two topics') || promptStr.includes('compare');
 
   // Local fallback response execution
   if (!process.env.OPENAI_API_KEY) {
@@ -236,7 +239,7 @@ app.post('/api/generate', async (req, res) => {
         model: modelName,
         max_tokens: maxTokens || 1800,
         messages: [
-          { role: 'system', content: system || 'Return JSON payload.' },
+          { role: 'system', content: system || 'Return payload.' },
           { role: 'user', content: prompt },
         ],
       }),
