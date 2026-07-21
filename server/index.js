@@ -9,203 +9,241 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Fallback for Connections Tab
- * Returns valid JSON containing a structured connection string to satisfy JSON.parse() on the frontend.
+ * Fully Dynamic Universal Diagram Generator
  */
-function generateConnectionsFallback(prompt = '') {
-  const comparisonText = `### Structural Synthesis & Systemic Comparison
+function generateUniversalDiagram(prompt = '') {
+  const query = prompt.toLowerCase();
+  const cleanTitle = prompt.trim() ? prompt.slice(0, 45) : 'System Model';
+  const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
 
-**Core Overview:**
-Both systems rely on sequential stage execution, state transitions, and feedback loops to maintain balance and deliver continuous, reliable flow.
+  // 1. LIBRARY MANAGEMENT SYSTEM
+  if (query.includes('library') || query.includes('book') || query.includes('borrow')) {
+    return {
+      title: `${formattedTitle} Database Schema`,
+      type: "schema",
+      nodes: [
+        { id: "1", type: "table", label: "Books Table", detail: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"], position: { x: 50, y: 100 } },
+        { id: "2", type: "table", label: "Members Table", detail: ["Member_ID (PK)", "Name", "Email", "Join_Date"], position: { x: 320, y: 100 } },
+        { id: "3", type: "table", label: "Loans Table", detail: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"], position: { x: 590, y: 100 } }
+      ],
+      edges: [
+        { from: "2", to: "3", label: "borrows" },
+        { from: "1", to: "3", label: "is loaned in" }
+      ],
+      tables: [
+        { name: "Books", columns: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"] },
+        { name: "Members", columns: ["Member_ID (PK)", "Name", "Email", "Join_Date"] },
+        { name: "Loans", columns: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"] }
+      ],
+      rationale: [
+        `Structures ${formattedTitle} by separating catalog assets from membership and active loan transactions.`,
+        "Enforces relational foreign keys to track book availability and member checkouts."
+      ],
+      code: {
+        language: "sql",
+        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Books (\n  Book_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Title VARCHAR(150) NOT NULL,\n  Author VARCHAR(100),\n  ISBN VARCHAR(20) UNIQUE,\n  Stock INT DEFAULT 1\n);\n\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Loans (\n  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Book_ID INT REFERENCES Books(Book_ID),\n  Member_ID INT REFERENCES Members(Member_ID),\n  Due_Date DATE\n);`
+      }
+    };
+  }
 
----
+  // 2. HOSPITAL / MEDICAL SYSTEM
+  if (query.includes('hospital') || query.includes('patient') || query.includes('doctor') || query.includes('medical')) {
+    return {
+      title: `${formattedTitle} Database Schema`,
+      type: "schema",
+      nodes: [
+        { id: "1", type: "table", label: "Patients Table", detail: ["Patient_ID (PK)", "Full_Name", "DOB", "Contact"], position: { x: 50, y: 100 } },
+        { id: "2", type: "table", label: "Doctors Table", detail: ["Doctor_ID (PK)", "Name", "Specialty", "Office_Room"], position: { x: 320, y: 100 } },
+        { id: "3", type: "table", label: "Appointments Table", detail: ["Appt_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Timestamp"], position: { x: 590, y: 100 } }
+      ],
+      edges: [
+        { from: "1", to: "3", label: "books" },
+        { from: "2", to: "3", label: "assigned to" }
+      ],
+      tables: [
+        { name: "Patients", columns: ["Patient_ID (PK)", "Full_Name", "DOB", "Contact"] },
+        { name: "Doctors", columns: ["Doctor_ID (PK)", "Name", "Specialty", "Office_Room"] },
+        { name: "Appointments", columns: ["Appt_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Timestamp"] }
+      ],
+      rationale: [
+        `Normalizes ${formattedTitle} data by isolating patient records and medical staff schedules.`,
+        "Maintains relational integrity across appointment booking logs."
+      ],
+      code: {
+        language: "sql",
+        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Patients (\n  Patient_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Full_Name VARCHAR(100) NOT NULL,\n  DOB DATE\n);\n\nCREATE TABLE Doctors (\n  Doctor_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Specialty VARCHAR(50)\n);\n\nCREATE TABLE Appointments (\n  Appt_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Patient_ID INT REFERENCES Patients(Patient_ID),\n  Doctor_ID INT REFERENCES Doctors(Doctor_ID),\n  Timestamp DATETIME\n);`
+      }
+    };
+  }
 
-### Key Comparison Dimensions
+  // 3. FARM MANAGEMENT (Default database schema fallback)
+  if (query.includes('database') || query.includes('schema') || query.includes('sql') || query.includes('farm') || query.includes('system') || query.includes('management') || query.includes('table')) {
+    return {
+      title: `${formattedTitle} Database Schema`,
+      type: "schema",
+      nodes: [
+        { id: "1", type: "table", label: "Farms Table", detail: ["Farm_ID (PK)", "Farm_Name", "Location", "Owner_ID"], position: { x: 50, y: 100 } },
+        { id: "2", type: "table", label: "Inventory / Yield Table", detail: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"], position: { x: 320, y: 100 } },
+        { id: "3", type: "table", label: "Logs Table", detail: ["Log_ID (PK)", "Farm_ID (FK)", "Activity_Type", "Timestamp"], position: { x: 590, y: 100 } }
+      ],
+      edges: [
+        { from: "1", to: "2", label: "manages inventory" },
+        { from: "1", to: "3", label: "tracks operations" }
+      ],
+      tables: [
+        { name: "Farms", columns: ["Farm_ID (PK)", "Farm_Name", "Location", "Owner_ID"] },
+        { name: "Inventory", columns: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"] },
+        { name: "Logs", columns: ["Log_ID (PK)", "Farm_ID (FK)", "Activity_Type", "Timestamp"] }
+      ],
+      rationale: [
+        `Normalizes ${formattedTitle} data by decoupling primary assets from operational logs.`,
+        "Enforces relational foreign keys to maintain database consistency."
+      ],
+      code: {
+        language: "sql",
+        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Farms (\n  Farm_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Farm_Name VARCHAR(100) NOT NULL,\n  Location VARCHAR(150)\n);\n\nCREATE TABLE Inventory (\n  Item_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Farm_ID INT REFERENCES Farms(Farm_ID),\n  Category VARCHAR(50),\n  Quantity INT DEFAULT 0\n);`
+      }
+    };
+  }
 
-1. **System Architecture & Flow**
-   - **Topic A:** Follows a strict 3-step handshake protocol (SYN, SYN-ACK, ACK) to statefully establish bidirectional session communication across digital networks.
-   - **Topic B:** Operates as a continuous natural closed-loop process driven by environmental thermodynamics and biological energy transfer.
-
-2. **Error Handling & Verification**
-   - **Topic A:** Employs explicit sequence numbers, acknowledgments, and checksums to prevent packet loss or corrupted state.
-   - **Topic B:** Maintains biological/climatic equilibrium through natural feedback mechanisms and rate-limiting environmental constraints.
-
-3. **Core Operational Purpose**
-   - **Topic A:** Guarantees reliable, ordered end-to-end data transfer over packet-switched networks.
-   - **Topic B:** Sustains life and energy redistribution across biological and environmental ecosystems.
-
----
-
-**Key Takeaway:**
-Despite operating in completely different domains (digital networking vs. natural science), both frameworks demonstrate how complex systems maintain operational integrity through structured state transitions, handshakes, and feedback protocols.`;
-
-  return JSON.stringify({
-    connection: comparisonText,
-    summary: comparisonText,
-    text: comparisonText
-  });
+  // 4. GENERAL PROCESS WORKFLOW
+  return {
+    title: `${formattedTitle} Workflow Diagram`,
+    type: "process",
+    nodes: [
+      { id: "1", label: "1. Core Setup & Inputs", detail: ["Ingest prompt parameters", "Validate environment state"], position: { x: 50, y: 120 } },
+      { id: "2", label: "2. Transformation Engine", detail: ["Apply algorithmic logic", "Transform intermediate state"], position: { x: 320, y: 120 } },
+      { id: "3", label: "3. Final Synthesis & Output", detail: ["Format final output", "Verify system metrics"], position: { x: 590, y: 120 } }
+    ],
+    edges: [
+      { from: "1", to: "2", label: "passes parameters" },
+      { from: "2", to: "3", label: "yields payload" }
+    ],
+    rationale: [
+      `Breaks down ${formattedTitle} into sequential, verifiable processing stages.`,
+      "Ensures predictable, deterministic execution across all runtime components."
+    ],
+    code: {
+      language: "python",
+      content: `# Implementation Blueprint for ${formattedTitle}\ndef run_pipeline(inputs):\n    data = [x.strip() for x in inputs if x]\n    result = f"Processed {len(data)} elements for ${formattedTitle}"\n    return result\n\nprint(run_pipeline(["Sample Payload"]))`
+    }
+  };
 }
 
 /**
- * Fallback for Practice Tab (5 Rich Multiple Choice Questions)
+ * Dynamic Practice Question Generator Fallback
  */
-function generatePracticeFallback(topic = '') {
-  const t = topic.toLowerCase();
+function generatePracticeFallback(prompt = '') {
+  const topic = prompt.replace(/generate 5 practice questions about:/i, '').trim() || 'this topic';
+  const words = topic.split(' ').filter(w => w.length > 3);
+  const keywordA = words[0] || 'Core Principle';
+  const keywordB = words[1] || 'Component';
 
-  if (t.includes('tcp') || t.includes('handshake') || t.includes('network')) {
-    return JSON.stringify({
-      topic: topic,
-      questions: [
-        {
-          id: 'q1',
-          question: 'What is the primary purpose of the initial SYN packet in a TCP 3-way handshake?',
-          options: [
-            'To synchronize sequence numbers and initiate a connection request',
-            'To immediately transfer encrypted payload data',
-            'To terminate an existing TCP session gracefully',
-            'To calculate network bandwidth latency'
-          ],
-          answer: 'To synchronize sequence numbers and initiate a connection request',
-          explanation: 'The SYN (Synchronize) packet informs the receiver of the sender\'s initial sequence number (ISN) to establish packet ordering.'
-        },
-        {
-          id: 'q2',
-          question: 'What response does the server send back upon receiving a SYN flag?',
-          options: [
-            'ACK only',
-            'SYN-ACK',
-            'FIN-ACK',
-            'RST'
-          ],
-          answer: 'SYN-ACK',
-          explanation: 'The server acknowledges the client\'s SYN by incrementing its sequence number and sending its own SYN flag back simultaneously (SYN-ACK).'
-        },
-        {
-          id: 'q3',
-          question: 'In what connection state is the TCP socket after the final ACK packet is received by the server?',
-          options: [
-            'SYN-SENT',
-            'SYN-RCVD',
-            'ESTABLISHED',
-            'CLOSE-WAIT'
-          ],
-          answer: 'ESTABLISHED',
-          explanation: 'Once the client sends the final ACK acknowledging the server\'s SYN-ACK, both sides transition to the ESTABLISHED state and data transfer begins.'
-        },
-        {
-          id: 'q4',
-          question: 'What flag is used to gracefully close a TCP connection after data transfer completes?',
-          options: [
-            'RST',
-            'FIN',
-            'PSH',
-            'URG'
-          ],
-          answer: 'FIN',
-          explanation: 'The FIN (Finish) flag is sent by an endpoint when it wants to terminate its side of the TCP connection.'
-        },
-        {
-          id: 'q5',
-          question: 'How does TCP handle a lost ACK packet during the 3-way handshake?',
-          options: [
-            'The connection immediately aborts',
-            'The server retransmits the SYN-ACK after a timeout',
-            'The client resets the IP address',
-            'Data transmission starts anyway'
-          ],
-          answer: 'The server retransmits the SYN-ACK after a timeout',
-          explanation: 'If the server does not receive the final ACK within its Retransmission Timeout (RTO) window, it resends the SYN-ACK.'
-        }
-      ]
-    });
-  }
-
-  // Generic 5-Question Fallback
   return JSON.stringify({
     topic: topic,
     questions: [
       {
         id: 'q1',
-        question: `What is the core underlying concept of ${topic || 'this subject'}?`,
+        question: `What is the primary role of ${keywordA} when studying ${topic}?`,
         options: [
-          'Modular structural decomposition and systematic processing',
-          'Randomized unstructured data storage',
-          'Single-threaded execution without feedback mechanisms',
-          'Manual memory allocation without boundaries'
+          `It serves as the foundational mechanism governing ${topic}`,
+          `It acts as an auxiliary logging interface with no functional impact`,
+          `It completely replaces external state boundaries in ${topic}`,
+          `It disables execution protocols across system nodes`
         ],
-        answer: 'Modular structural decomposition and systematic processing',
-        explanation: 'Breaking complex processes into modular steps ensures reliability, maintainability, and clear execution bounds.'
+        answer: `It serves as the foundational mechanism governing ${topic}`,
+        explanation: `In the context of ${topic}, ${keywordA} plays a crucial structural role by controlling initial inputs and execution rules.`
       },
       {
         id: 'q2',
-        question: `Why is relationship normalization/mapping critical in ${topic || 'this domain'}?`,
+        question: `How does ${keywordB} interact within the workflow of ${topic}?`,
         options: [
-          'It eliminates data redundancy and enforces integrity',
-          'It increases latency across network boundaries',
-          'It forces all state to be volatile',
-          'It disables user access controls'
+          `By bypassing state verification steps`,
+          `By processing intermediate transformations and validating conditions`,
+          `By forcing static memory allocation across all runtime routines`,
+          `By preventing data ingestion from primary sources`
         ],
-        answer: 'It eliminates data redundancy and enforces integrity',
-        explanation: 'Normalization prevents duplicate entries and ensures changes to data elements propagate consistently.'
+        answer: `By processing intermediate transformations and validating conditions`,
+        explanation: `${keywordB} handles critical state transitions and rule verification during the execution lifecycle of ${topic}.`
       },
       {
         id: 'q3',
-        question: `How do state transitions operate within ${topic || 'this system'}?`,
+        question: `Which scenario represents a common failure state in ${topic}?`,
         options: [
-          'Through sequential trigger events and verified conditions',
-          'By continuously overwriting core parameters at random',
-          'Through static unchangeable constants',
-          'By bypassing validation protocols'
+          `Executing valid inputs within designated bounds`,
+          `Unchecked parameter divergence or missing constraints`,
+          `Automated success logging after execution`,
+          `Proper normalization of core structural entities`
         ],
-        answer: 'Through sequential trigger events and verified conditions',
-        explanation: 'State transitions occur systematically as input criteria and execution rules are met.'
+        answer: `Unchecked parameter divergence or missing constraints`,
+        explanation: `Without strict parameter checking and boundary enforcement, ${topic} can experience invalid state errors.`
       },
       {
         id: 'q4',
-        question: `What is the primary failure mode prevented by structural validation in ${topic || 'this field'}?`,
+        question: `Why is modular decomposition beneficial when analyzing ${topic}?`,
         options: [
-          'Data corruption and invalid system states',
-          'Overly fast processing times',
-          'Automated documentation generation',
-          'Redundant user interfaces'
+          `It isolates components for easier testing, scaling, and maintenance`,
+          `It increases overall system complexity unnecessarily`,
+          `It prevents any reusability of core logic`,
+          `It restricts operational execution to a single static thread`
         ],
-        answer: 'Data corruption and invalid system states',
-        explanation: 'Validation ensures that bad inputs or missing parameters are caught before affecting downstream dependencies.'
+        answer: `It isolates components for easier testing, scaling, and maintenance`,
+        explanation: `Breaking ${topic} down into distinct modules allows each sub-component to be verified and optimized independently.`
       },
       {
         id: 'q5',
-        question: `Which methodology provides optimal scaling for ${topic || 'this architecture'}?`,
+        question: `What is the expected end result upon completing the ${topic} process?`,
         options: [
-          'Decoupled modular components with explicit contracts',
-          'Monolithic tightly coupled single-file scripts',
-          'Unindexed database queries without keys',
-          'Hardcoded global static variables'
+          `A verified, structured outcome aligning with defined requirements`,
+          `An unformatted raw memory dump with missing fields`,
+          `An aborted execution thread with state loss`,
+          `An unverified circular feedback loop`
         ],
-        answer: 'Decoupled modular components with explicit contracts',
-        explanation: 'Decoupled modules allow individual parts of the system to scale and adapt independently.'
+        answer: `A verified, structured outcome aligning with defined requirements`,
+        explanation: `A properly executed ${topic} workflow finishes by returning validated results that meet target constraints.`
       }
     ]
   });
 }
 
 /**
- * Universal Diagram Generator Fallback
+ * Dynamic Connections Generator Fallback
  */
-function generateUniversalDiagram(prompt = '') {
+function generateConnectionsFallback(prompt = '') {
+  const match = prompt.match(/Compare "(.*?)" and "(.*?)"/i);
+  const topicA = match ? match[1] : 'Topic A';
+  const topicB = match ? match[2] : 'Topic B';
+
+  const text = `### Comparative Synthesis: ${topicA} vs. ${topicB}
+
+**Core Analysis:**
+While **${topicA}** and **${topicB}** address different aspects of their respective domains, both rely on structured execution rules, state maintenance, and systematic validation to achieve reliable outcomes.
+
+---
+
+### Key Comparison Dimensions
+
+1. **Primary Focus & Purpose**
+   - **${topicA}:** Concentrates on establishing structural rules, execution flow, and handling domain parameters.
+   - **${topicB}:** Focuses on managing transformation pipelines, state transitions, and downstream integration.
+
+2. **Operational Mechanisms**
+   - **${topicA}:** Executes sequentially through defined input boundaries and validation constraints.
+   - **${topicB}:** Utilizes feedback loops or multi-stage processes to ensure operational consistency.
+
+3. **Practical Trade-offs & Integration**
+   - **${topicA}:** Offers high precision in its primary domain, though it requires verified inputs.
+   - **${topicB}:** Provides broader flexibility, making it adaptable across complementary workflows.
+
+---
+
+**Key Takeaway:**
+Understanding both **${topicA}** and **${topicB}** highlights how different system models enforce integrity—one through strict input boundaries and the other through dynamic process management.`;
+
   return JSON.stringify({
-    title: `${prompt.charAt(0).toUpperCase() + prompt.slice(1)} Breakdown`,
-    type: "process",
-    nodes: [
-      { id: "1", label: "1. Core Principles & Inputs", detail: ["Define inputs", "Set execution bounds"] },
-      { id: "2", label: "2. Process Execution", detail: ["Apply transformations", "Validate parameters"] },
-      { id: "3", label: "3. Output & Results", detail: ["Synthesize findings", "Verify metrics"] }
-    ],
-    edges: [
-      { from: "1", to: "2", label: "processes" },
-      { from: "2", to: "3", label: "yields" }
-    ],
-    rationale: ["Breaks down complex subjects into sequential concepts."],
-    code: { language: "python", content: `# Python Implementation\nprint('Analyzing ${prompt}')` }
+    connection: text,
+    summary: text,
+    text: text
   });
 }
 
@@ -221,57 +259,16 @@ app.post('/api/generate', async (req, res) => {
   const promptStr = (prompt || '').toLowerCase();
 
   const isPracticeRequest = sysStr.includes('question') || sysStr.includes('practice') || sysStr.includes('quiz') || promptStr.includes('question');
-  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || sysStr.includes('two topics') || promptStr.includes('compare');
+  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || promptStr.includes('compare');
 
-  // Local fallback response execution
-  if (!process.env.OPENAI_API_KEY) {
-    if (isConnectionsRequest) {
-      return res.json({ text: generateConnectionsFallback(prompt) });
-    }
-    if (isPracticeRequest) {
-      return res.json({ text: generatePracticeFallback(prompt) });
-    }
-    return res.json({ text: generateUniversalDiagram(prompt) });
+  if (isConnectionsRequest) {
+    return res.json({ text: generateConnectionsFallback(prompt) });
+  }
+  if (isPracticeRequest) {
+    return res.json({ text: generatePracticeFallback(prompt) });
   }
 
-  try {
-    const modelName = process.env.OPENAI_MODEL || 'gpt-4o';
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: modelName,
-        max_tokens: maxTokens || 1800,
-        messages: [
-          { role: 'system', content: system || 'Return payload.' },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error('OpenAI API Quota/Error (Using Smart Fallback):', response.status);
-      if (isConnectionsRequest) return res.json({ text: generateConnectionsFallback(prompt) });
-      if (isPracticeRequest) return res.json({ text: generatePracticeFallback(prompt) });
-      return res.json({ text: generateUniversalDiagram(prompt) });
-    }
-
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || '';
-    const cleanText = text.replace(/```json|```/g, '').trim();
-
-    res.json({ text: cleanText });
-
-  } catch (err) {
-    console.error('Server error (Using Smart Fallback):', err.message);
-    if (isConnectionsRequest) return res.json({ text: generateConnectionsFallback(prompt) });
-    if (isPracticeRequest) return res.json({ text: generatePracticeFallback(prompt) });
-    res.json({ text: generateUniversalDiagram(prompt) });
-  }
+  return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
 });
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));

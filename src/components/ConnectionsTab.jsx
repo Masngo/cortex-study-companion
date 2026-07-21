@@ -1,116 +1,191 @@
-import React, { useEffect, useState } from 'react';
-import { Loader2, Network } from 'lucide-react';
+import React, { useState } from 'react';
 import { TOKENS } from '../lib/tokens.js';
-import { callAI } from '../lib/ai.js';
-import { CONNECTIONS_SYSTEM_PROMPT } from '../lib/prompts.js';
-import { getStudyItems } from '../lib/storage.js';
+import { Network } from 'lucide-react';
 
-export default function ConnectionsTab({ refreshKey }) {
-  const [items, setItems] = useState([]);
-  const [aId, setAId] = useState('');
-  const [bId, setBId] = useState('');
-  const [result, setResult] = useState(null);
+function FormattedText({ content }) {
+  if (!content) return null;
+
+  const sections = content.split(/\n{2,}|---/).filter(Boolean);
+
+  return (
+    <div className="space-y-4">
+      {sections.map((section, idx) => {
+        const trimmed = section.trim();
+
+        if (trimmed.startsWith('#')) {
+          const headingText = trimmed.replace(/^#+\s*/, '');
+          return (
+            <h3 key={idx} className="text-lg font-bold border-b pb-1 mt-2" style={{ color: TOKENS.ink, borderColor: TOKENS.line + '33' }}>
+              {headingText}
+            </h3>
+          );
+        }
+
+        const lines = trimmed.split('\n');
+
+        return (
+          <div key={idx} className="space-y-1.5">
+            {lines.map((line, lIdx) => {
+              const parts = line.split(/(\*\*.*?\*\*)/g);
+              const formattedLine = parts.map((part, pIdx) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  return (
+                    <strong key={pIdx} style={{ color: TOKENS.ink }}>
+                      {part.slice(2, -2)}
+                    </strong>
+                  );
+                }
+                return part;
+              });
+
+              return (
+                <p key={lIdx} className="text-sm leading-relaxed" style={{ color: TOKENS.inkSoft }}>
+                  {formattedLine}
+                </p>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ConnectionsTab({ studyLog = [] }) {
+  // Default topics to populate dropdowns even when studyLog is empty
+  const defaultTopics = [
+    "TCP 3-Way Handshake Protocol",
+    "Photosynthesis and Water Cycle",
+    "Random Forest Crop Yield Prediction",
+    "Hospital Management Relational Database",
+    "OAuth 2.0 Authentication Flow"
+  ];
+
+  // Merge study log titles with defaults to ensure dropdown is never empty
+  const availableTopics = studyLog.length > 0 
+    ? studyLog.map((item) => item.title || item.topic || String(item)) 
+    : defaultTopics;
+
+  const [topicA, setTopicA] = useState(availableTopics[0] || '');
+  const [topicB, setTopicB] = useState(availableTopics[1] || availableTopics[0] || '');
+  const [connectionText, setConnectionText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const list = getStudyItems();
-    setItems(list);
-    if (list.length >= 2) {
-      setAId((prev) => prev || list[0].id);
-      setBId((prev) => prev || list[1].id);
-    }
-  }, [refreshKey]);
-
-  const explain = async () => {
-    const a = items.find((i) => i.id === aId);
-    const b = items.find((i) => i.id === bId);
-    if (!a || !b || a.id === b.id) return;
+  const handleCompare = async () => {
+    if (!topicA.trim() || !topicB.trim()) return;
     setLoading(true);
-    setError(false);
-    setResult(null);
+    setError('');
+    setConnectionText('');
+
     try {
-      const prompt = JSON.stringify({
-        topicA: { title: a.diagram.title, type: a.diagram.type, nodes: a.diagram.nodes.map((n) => n.label) },
-        topicB: { title: b.diagram.title, type: b.diagram.type, nodes: b.diagram.nodes.map((n) => n.label) },
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: 'Compare two topics studied by the user. Highlight conceptual connections, differences, and practical takeaways.',
+          prompt: `Compare "${topicA}" and "${topicB}".`,
+        }),
       });
-      const raw = await callAI(CONNECTIONS_SYSTEM_PROMPT, prompt);
-      setResult(JSON.parse(raw));
-    } catch (e) {
-      setError(true);
+
+      const data = await response.json();
+      let textContent = '';
+
+      try {
+        const parsed = JSON.parse(data.text);
+        textContent = parsed.connection || parsed.summary || parsed.text || data.text;
+      } catch {
+        textContent = data.text;
+      }
+
+      setConnectionText(textContent);
+    } catch (err) {
+      console.error(err);
+      setError("Couldn't generate comparison — please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (items.length < 2) {
-    return (
-      <div style={{ background: TOKENS.blueprint }} className="rounded-md p-6 text-center">
-        <Network size={22} color={TOKENS.gold} className="mx-auto mb-2" />
-        <p style={{ color: '#ffffffaa' }} className="text-sm">Save at least two topics to your Study Log to see how they connect.</p>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <div style={{ background: TOKENS.blueprint }} className="rounded-md p-4 mb-5">
-        <div className="flex items-center gap-1.5 mb-3">
-          <Network size={14} color={TOKENS.gold} />
-          <h3 style={{ color: TOKENS.paper }} className="text-[13px] font-semibold">Compare two things you've studied</h3>
-        </div>
-        <div className="flex gap-3 flex-wrap items-center">
-          <select
-            value={aId}
-            onChange={(e) => setAId(e.target.value)}
-            style={{ background: TOKENS.paper, color: TOKENS.ink }}
-            className="text-sm px-3 py-2 rounded-sm outline-none flex-1 min-w-[160px]"
-          >
-            {items.map((i) => (
-              <option key={i.id} value={i.id}>{i.title}</option>
-            ))}
-          </select>
-          <span style={{ color: '#ffffff88' }} className="text-sm">and</span>
-          <select
-            value={bId}
-            onChange={(e) => setBId(e.target.value)}
-            style={{ background: TOKENS.paper, color: TOKENS.ink }}
-            className="text-sm px-3 py-2 rounded-sm outline-none flex-1 min-w-[160px]"
-          >
-            {items.map((i) => (
-              <option key={i.id} value={i.id}>{i.title}</option>
-            ))}
-          </select>
-        </div>
-        <button
-          onClick={explain}
-          disabled={loading || aId === bId}
-          style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }}
-          className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[12px] font-semibold"
-        >
-          {loading ? <Loader2 size={13} className="animate-spin" /> : <Network size={13} />}
-          {loading ? 'Thinking...' : 'Explain the connection'}
-        </button>
-        {aId === bId && <p style={{ color: '#f5a3a3' }} className="text-[11px] mt-1.5">Pick two different topics.</p>}
-        {error && <p style={{ color: '#f5a3a3' }} className="text-[11px] mt-1.5">Couldn't generate that — try again.</p>}
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="flex items-center gap-2">
+        <Network size={20} color={TOKENS.gold} />
+        <h2 className="text-lg font-bold" style={{ color: TOKENS.paper }}>
+          Compare two things you've studied
+        </h2>
       </div>
 
-      {result && (
-        <div style={{ background: TOKENS.paper }} className="rounded-md p-5">
-          <p style={{ color: TOKENS.ink }} className="text-[14px] leading-relaxed">{result.connection}</p>
-          {result.sharedConcepts && result.sharedConcepts.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {result.sharedConcepts.map((c, i) => (
-                <span
-                  key={i}
-                  style={{ background: TOKENS.goodSoft, color: TOKENS.good }}
-                  className="text-[11px] font-medium px-2 py-1 rounded-sm"
-                >
-                  {c}
-                </span>
-              ))}
-            </div>
-          )}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex-1 min-w-[240px] space-y-1">
+          <input
+            type="text"
+            value={topicA}
+            onChange={(e) => setTopicA(e.target.value)}
+            placeholder="Type or select first topic..."
+            className="w-full p-2.5 rounded-md border text-sm font-medium"
+            style={{ background: TOKENS.paper, color: TOKENS.ink, borderColor: TOKENS.line }}
+          />
+          <select
+            onChange={(e) => setTopicA(e.target.value)}
+            className="w-full p-1.5 rounded text-xs font-medium opacity-80"
+            style={{ background: TOKENS.paper, color: TOKENS.ink }}
+          >
+            <option value="">-- Choose from saved/suggested topics --</option>
+            {availableTopics.map((t, idx) => (
+              <option key={idx} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <span className="text-sm font-semibold pt-1" style={{ color: TOKENS.paper }}>
+          and
+        </span>
+
+        <div className="flex-1 min-w-[240px] space-y-1">
+          <input
+            type="text"
+            value={topicB}
+            onChange={(e) => setTopicB(e.target.value)}
+            placeholder="Type or select second topic..."
+            className="w-full p-2.5 rounded-md border text-sm font-medium"
+            style={{ background: TOKENS.paper, color: TOKENS.ink, borderColor: TOKENS.line }}
+          />
+          <select
+            onChange={(e) => setTopicB(e.target.value)}
+            className="w-full p-1.5 rounded text-xs font-medium opacity-80"
+            style={{ background: TOKENS.paper, color: TOKENS.ink }}
+          >
+            <option value="">-- Choose from saved/suggested topics --</option>
+            {availableTopics.map((t, idx) => (
+              <option key={idx} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <button
+        onClick={handleCompare}
+        disabled={loading}
+        style={{ background: TOKENS.gold, color: TOKENS.blueprintDeep }}
+        className="px-4 py-2 rounded-md font-semibold text-sm flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
+      >
+        <Network size={16} />
+        {loading ? 'Analyzing Connection...' : 'Explain the connection'}
+      </button>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      {connectionText && (
+        <div
+          style={{ background: TOKENS.paper, borderColor: TOKENS.line }}
+          className="p-6 rounded-md border shadow-md mt-4"
+        >
+          <FormattedText content={connectionText} />
         </div>
       )}
     </div>
