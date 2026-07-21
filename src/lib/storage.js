@@ -19,13 +19,6 @@ const INITIAL_MOCK_LOG = [
 
 export function getStudyLog() {
   try {
-<<<<<<< HEAD
-    const data = localStorage.getItem(ITEMS_KEY);
-    const parsed = data ? JSON.parse(data) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (e) {
-    return [];
-=======
     const data = localStorage.getItem(STUDY_LOG_KEY);
     if (!data) {
       localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(INITIAL_MOCK_LOG));
@@ -36,7 +29,6 @@ export function getStudyLog() {
   } catch (err) {
     console.error('Failed to load study log', err);
     return INITIAL_MOCK_LOG;
->>>>>>> eb93a25e71ba6e2fe9a18aef57715e3bb98754ff
   }
 }
 
@@ -62,36 +54,6 @@ export function saveToStudyLog(item) {
   }
 }
 
-<<<<<<< HEAD
-export function deleteStudyItem(id) {
-  const items = getStudyItems().filter((i) => i && i.id !== id);
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
-}
-
-export function getStats() {
-  try {
-    const data = localStorage.getItem(STATS_KEY);
-    const parsed = data ? JSON.parse(data) : null;
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return {
-        correct: typeof parsed.correct === 'number' ? parsed.correct : 0,
-        incorrect: typeof parsed.incorrect === 'number' ? parsed.incorrect : 0,
-      };
-    }
-    return { correct: 0, incorrect: 0 };
-  } catch (e) {
-    return { correct: 0, incorrect: 0 };
-  }
-}
-
-export function recordAnswer(result) {
-  const stats = getStats();
-  const key = result === 'correct' ? 'correct' : 'incorrect';
-  const next = { ...stats, [key]: stats[key] + 1 };
-  localStorage.setItem(STATS_KEY, JSON.stringify(next));
-  return next;
-}
-=======
 export const saveStudyItem = saveToStudyLog;
 
 export function deleteFromStudyLog(id) {
@@ -134,4 +96,3 @@ export function savePracticeStats(isCorrect) {
 export function getStats() {
   return getPracticeStats();
 }
->>>>>>> eb93a25e71ba6e2fe9a18aef57715e3bb98754ff
