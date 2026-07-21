@@ -4,9 +4,10 @@ const PRACTICE_STATS_KEY = 'cortex_practice_stats_v1';
 const INITIAL_MOCK_LOG = [
   {
     id: '1',
+    title: 'Library System Database',
     topic: 'Library System Database',
-    timestamp: new Date().toISOString(),
-    data: {
+    savedAt: new Date().toISOString(),
+    diagram: {
       type: 'schema',
       nodes: [{ title: 'Books', details: ['isbn', 'title', 'author'] }, { title: 'Members', details: ['member_id', 'name'] }],
       edges: [{ from: 'Members', to: 'Books', label: 'loans' }],
@@ -24,7 +25,7 @@ export function getStudyLog() {
       return INITIAL_MOCK_LOG;
     }
     const parsed = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : INITIAL_MOCK_LOG;
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_MOCK_LOG;
   } catch (err) {
     console.error('Failed to load study log', err);
     return INITIAL_MOCK_LOG;
@@ -38,11 +39,12 @@ export function saveToStudyLog(item) {
     const log = getStudyLog();
     const newItem = {
       id: item.id || Date.now().toString(),
-      topic: item.topic || 'Untitled Topic',
-      timestamp: item.timestamp || new Date().toISOString(),
-      data: item.data || item
+      title: item.title || item.topic || 'Untitled Topic',
+      topic: item.topic || item.title || 'Untitled Topic',
+      savedAt: item.savedAt || new Date().toISOString(),
+      diagram: item.diagram || item.data || item
     };
-    const filtered = log.filter(entry => entry.topic.toLowerCase() !== newItem.topic.toLowerCase());
+    const filtered = log.filter(entry => entry.title.toLowerCase() !== newItem.title.toLowerCase());
     const updated = [newItem, ...filtered];
     localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(updated));
     return updated;
@@ -71,9 +73,9 @@ export const deleteStudyItem = deleteFromStudyLog;
 export function getPracticeStats() {
   try {
     const data = localStorage.getItem(PRACTICE_STATS_KEY);
-    return data ? JSON.parse(data) : { correct: 3, incorrect: 1, total: 4 };
+    return data ? JSON.parse(data) : { correct: 3, incorrect: 1 };
   } catch (err) {
-    return { correct: 3, incorrect: 1, total: 4 };
+    return { correct: 3, incorrect: 1 };
   }
 }
 
@@ -82,8 +84,7 @@ export function savePracticeStats(isCorrect) {
     const stats = getPracticeStats();
     const updated = {
       correct: stats.correct + (isCorrect ? 1 : 0),
-      incorrect: stats.incorrect + (isCorrect ? 0 : 1),
-      total: stats.total + 1
+      incorrect: stats.incorrect + (isCorrect ? 0 : 1)
     };
     localStorage.setItem(PRACTICE_STATS_KEY, JSON.stringify(updated));
     return updated;
@@ -93,11 +94,5 @@ export function savePracticeStats(isCorrect) {
 }
 
 export function getStats() {
-  const items = getStudyLog();
-  const practice = getPracticeStats();
-  return {
-    totalStudied: items.length,
-    practiceStats: practice,
-    streak: 1
-  };
+  return getPracticeStats();
 }
