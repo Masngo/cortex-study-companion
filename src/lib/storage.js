@@ -20,7 +20,6 @@ export function saveToStudyLog(item) {
       timestamp: item.timestamp || new Date().toISOString(),
       data: item.data || item
     };
-    // Avoid exact duplicates based on topic title
     const filtered = log.filter(entry => entry.topic.toLowerCase() !== newItem.topic.toLowerCase());
     const updated = [newItem, ...filtered];
     localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(updated));
@@ -30,6 +29,9 @@ export function saveToStudyLog(item) {
     return getStudyLog();
   }
 }
+
+// Alias to support components importing saveStudyItem
+export const saveStudyItem = saveToStudyLog;
 
 export function deleteFromStudyLog(id) {
   try {
