@@ -9,235 +9,181 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Fully Dynamic Universal Diagram Generator
+ * Intelligent Dynamic Schema & SQL Generator
  */
-function generateUniversalDiagram(prompt = '') {
+function generateDynamicSchema(prompt = '') {
   const query = prompt.toLowerCase();
-  const cleanTitle = prompt.trim() ? prompt.slice(0, 45) : 'System Model';
-  const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
+  const rawTitle = prompt.replace(/design a database for|create a database|schema for/gi, '').trim() || 'System Management';
+  const formattedTitle = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
 
-  // 1. HOSPITAL / MEDICAL SYSTEM (Checked first to prevent overlapping keywords)
+  // 1. HOSPITAL / MEDICAL SYSTEM
   if (query.includes('hospital') || query.includes('patient') || query.includes('doctor') || query.includes('medical')) {
     return {
-      title: `${formattedTitle} Database Schema`,
+      title: `${formattedTitle} Schema`,
       type: "schema",
-      nodes: [
-        { id: "1", type: "table", label: "Patients Table", detail: ["Patient_ID (PK)", "Full_Name", "DOB", "Contact"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Doctors Table", detail: ["Doctor_ID (PK)", "Name", "Specialty", "Office_Room"], position: { x: 320, y: 100 } },
-        { id: "3", type: "table", label: "Appointments Table", detail: ["Appt_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Timestamp"], position: { x: 590, y: 100 } }
-      ],
-      edges: [
-        { from: "1", to: "3", label: "books" },
-        { from: "2", to: "3", label: "assigned to" }
-      ],
       tables: [
-        { name: "Patients", columns: ["Patient_ID (PK)", "Full_Name", "DOB", "Contact"] },
-        { name: "Doctors", columns: ["Doctor_ID (PK)", "Name", "Specialty", "Office_Room"] },
-        { name: "Appointments", columns: ["Appt_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Timestamp"] }
+        { name: "Patients", columns: ["Patient_ID (PK)", "Full_Name", "DOB", "Phone", "Address"] },
+        { name: "Doctors", columns: ["Doctor_ID (PK)", "Name", "Specialty", "Room_Number"] },
+        { name: "Appointments", columns: ["Appt_ID (PK)", "Patient_ID (FK)", "Doctor_ID (FK)", "Appt_Date", "Status"] }
       ],
       rationale: [
-        `Normalizes ${formattedTitle} data by isolating patient records and medical staff schedules.`,
-        "Maintains relational integrity across appointment booking logs."
+        `Isolates patient demographic data from doctor schedules for clean hospital management.`,
+        `Maintains appointment foreign keys to prevent double-booking.`
       ],
       code: {
         language: "sql",
-        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Patients (\n  Patient_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Full_Name VARCHAR(100) NOT NULL,\n  DOB DATE\n);\n\nCREATE TABLE Doctors (\n  Doctor_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Specialty VARCHAR(50)\n);\n\nCREATE TABLE Appointments (\n  Appt_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Patient_ID INT REFERENCES Patients(Patient_ID),\n  Doctor_ID INT REFERENCES Doctors(Doctor_ID),\n  Timestamp DATETIME\n);`
+        content: `-- Complete Multi-Table Schema for ${formattedTitle}\nCREATE TABLE Patients (\n  Patient_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Full_Name VARCHAR(100) NOT NULL,\n  DOB DATE NOT NULL,\n  Phone VARCHAR(20),\n  Address VARCHAR(255)\n);\n\nCREATE TABLE Doctors (\n  Doctor_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Specialty VARCHAR(100) NOT NULL,\n  Room_Number VARCHAR(20)\n);\n\nCREATE TABLE Appointments (\n  Appt_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Patient_ID INT NOT NULL,\n  Doctor_ID INT NOT NULL,\n  Appt_Date DATETIME NOT NULL,\n  Status VARCHAR(50) DEFAULT 'Scheduled',\n  FOREIGN KEY (Patient_ID) REFERENCES Patients(Patient_ID),\n  FOREIGN KEY (Doctor_ID) REFERENCES Doctors(Doctor_ID)\n);`
       }
     };
   }
 
-  // 2. LIBRARY MANAGEMENT SYSTEM
+  // 2. SCHOOL / UNIVERSITY MANAGEMENT SYSTEM
+  if (query.includes('school') || query.includes('student') || query.includes('course') || query.includes('teacher') || query.includes('university')) {
+    return {
+      title: `${formattedTitle} Schema`,
+      type: "schema",
+      tables: [
+        { name: "Students", columns: ["Student_ID (PK)", "First_Name", "Last_Name", "Email", "Enrollment_Date"] },
+        { name: "Courses", columns: ["Course_ID (PK)", "Course_Code", "Title", "Credits"] },
+        { name: "Enrollments", columns: ["Enrollment_ID (PK)", "Student_ID (FK)", "Course_ID (FK)", "Grade"] }
+      ],
+      rationale: [
+        `Separates student records from course catalogs, linking them through a many-to-many Enrollments table.`,
+        `Enforces referential integrity on course registrations and grades.`
+      ],
+      code: {
+        language: "sql",
+        content: `-- Complete Multi-Table Schema for ${formattedTitle}\nCREATE TABLE Students (\n  Student_ID INT PRIMARY KEY AUTO_INCREMENT,\n  First_Name VARCHAR(50) NOT NULL,\n  Last_Name VARCHAR(50) NOT NULL,\n  Email VARCHAR(100) UNIQUE NOT NULL,\n  Enrollment_Date DATE DEFAULT (CURRENT_DATE)\n);\n\nCREATE TABLE Courses (\n  Course_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Course_Code VARCHAR(20) UNIQUE NOT NULL,\n  Title VARCHAR(150) NOT NULL,\n  Credits INT DEFAULT 3\n);\n\nCREATE TABLE Enrollments (\n  Enrollment_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Student_ID INT NOT NULL,\n  Course_ID INT NOT NULL,\n  Grade VARCHAR(5),\n  FOREIGN KEY (Student_ID) REFERENCES Students(Student_ID),\n  FOREIGN KEY (Course_ID) REFERENCES Courses(Course_ID)\n);`
+      }
+    };
+  }
+
+  // 3. CHURCH MANAGEMENT SYSTEM
+  if (query.includes('church') || query.includes('congregation') || query.includes('ministry') || query.includes('tithe')) {
+    return {
+      title: `${formattedTitle} Schema`,
+      type: "schema",
+      tables: [
+        { name: "Members", columns: ["Member_ID (PK)", "Full_Name", "Phone", "Email", "Membership_Status"] },
+        { name: "Ministries", columns: ["Ministry_ID (PK)", "Ministry_Name", "Leader_ID (FK)", "Meeting_Day"] },
+        { name: "Contributions", columns: ["Contribution_ID (PK)", "Member_ID (FK)", "Amount", "Fund_Type", "Date"] }
+      ],
+      rationale: [
+        `Organizes congregation members and departmental ministries with designated leadership keys.`,
+        `Tracks financial tithes and offerings securely linked to individual member profiles.`
+      ],
+      code: {
+        language: "sql",
+        content: `-- Complete Multi-Table Schema for ${formattedTitle}\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Full_Name VARCHAR(100) NOT NULL,\n  Phone VARCHAR(20),\n  Email VARCHAR(100) UNIQUE,\n  Membership_Status VARCHAR(50) DEFAULT 'Active'\n);\n\nCREATE TABLE Ministries (\n  Ministry_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Ministry_Name VARCHAR(100) NOT NULL,\n  Leader_ID INT,\n  Meeting_Day VARCHAR(30),\n  FOREIGN KEY (Leader_ID) REFERENCES Members(Member_ID)\n);\n\nCREATE TABLE Contributions (\n  Contribution_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Member_ID INT NOT NULL,\n  Amount DECIMAL(10,2) NOT NULL,\n  Fund_Type VARCHAR(50) DEFAULT 'General Tithe',\n  Date DATE DEFAULT (CURRENT_DATE),\n  FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID)\n);`
+      }
+    };
+  }
+
+  // 4. LIBRARY MANAGEMENT SYSTEM
   if (query.includes('library') || query.includes('book') || query.includes('borrow')) {
     return {
-      title: `${formattedTitle} Database Schema`,
+      title: `${formattedTitle} Schema`,
       type: "schema",
-      nodes: [
-        { id: "1", type: "table", label: "Books Table", detail: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Members Table", detail: ["Member_ID (PK)", "Name", "Email", "Join_Date"], position: { x: 320, y: 100 } },
-        { id: "3", type: "table", label: "Loans Table", detail: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"], position: { x: 590, y: 100 } }
-      ],
-      edges: [
-        { from: "2", to: "3", label: "borrows" },
-        { from: "1", to: "3", label: "is loaned in" }
-      ],
       tables: [
-        { name: "Books", columns: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"] },
         { name: "Members", columns: ["Member_ID (PK)", "Name", "Email", "Join_Date"] },
-        { name: "Loans", columns: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"] }
+        { name: "Books", columns: ["ISBN (PK)", "Title", "Author", "Publisher", "Copies_Available"] },
+        { name: "Loans", columns: ["Loan_ID (PK)", "Member_ID (FK)", "ISBN (FK)", "Due_Date", "Return_Date"] }
       ],
       rationale: [
-        `Structures ${formattedTitle} by separating catalog assets from membership and active loan transactions.`,
-        "Enforces relational foreign keys to track book availability and member checkouts."
+        `Isolates library members from book inventories and tracks active checkout loans.`,
+        `Enforces stock limitations and due date constraints.`
       ],
       code: {
         language: "sql",
-        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Books (\n  Book_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Title VARCHAR(150) NOT NULL,\n  Author VARCHAR(100),\n  ISBN VARCHAR(20) UNIQUE,\n  Stock INT DEFAULT 1\n);\n\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Loans (\n  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Book_ID INT REFERENCES Books(Book_ID),\n  Member_ID INT REFERENCES Members(Member_ID),\n  Due_Date DATE\n);`
+        content: `-- Complete Multi-Table Schema for Library Management\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Email VARCHAR(100) UNIQUE NOT NULL,\n  Join_Date DATE DEFAULT (CURRENT_DATE)\n);\n\nCREATE TABLE Books (\n  ISBN VARCHAR(20) PRIMARY KEY,\n  Title VARCHAR(255) NOT NULL,\n  Author VARCHAR(100) NOT NULL,\n  Publisher VARCHAR(100),\n  Copies_Available INT DEFAULT 1\n);\n\nCREATE TABLE Loans (\n  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Member_ID INT NOT NULL,\n  ISBN VARCHAR(20) NOT NULL,\n  Issue_Date DATE DEFAULT (CURRENT_DATE),\n  Due_Date DATE NOT NULL,\n  Return_Date DATE,\n  FOREIGN KEY (Member_ID) REFERENCES Members(Member_ID),\n  FOREIGN KEY (ISBN) REFERENCES Books(ISBN)\n);`
       }
     };
   }
 
-  // 3. FARM MANAGEMENT SYSTEM
-  if (query.includes('farm') || query.includes('crop') || query.includes('livestock') || query.includes('agriculture')) {
-    return {
-      title: `${formattedTitle} Database Schema`,
-      type: "schema",
-      nodes: [
-        { id: "1", type: "table", label: "Farms Table", detail: ["Farm_ID (PK)", "Farm_Name", "Location", "Owner_ID"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Inventory Table", detail: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"], position: { x: 320, y: 100 } },
-        { id: "3", type: "table", label: "Logs Table", detail: ["Log_ID (PK)", "Farm_ID (FK)", "Activity_Type", "Timestamp"], position: { x: 590, y: 100 } }
-      ],
-      edges: [
-        { from: "1", to: "2", label: "manages inventory" },
-        { from: "1", to: "3", label: "tracks operations" }
-      ],
-      tables: [
-        { name: "Farms", columns: ["Farm_ID (PK)", "Farm_Name", "Location", "Owner_ID"] },
-        { name: "Inventory", columns: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"] },
-        { name: "Logs", columns: ["Log_ID (PK)", "Farm_ID (FK)", "Activity_Type", "Timestamp"] }
-      ],
-      rationale: [
-        `Normalizes ${formattedTitle} data by decoupling primary assets from operational logs.`,
-        "Enforces relational foreign keys to maintain database consistency."
-      ],
-      code: {
-        language: "sql",
-        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Farms (\n  Farm_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Farm_Name VARCHAR(100) NOT NULL,\n  Location VARCHAR(150)\n);\n\nCREATE TABLE Inventory (\n  Item_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Farm_ID INT REFERENCES Farms(Farm_ID),\n  Category VARCHAR(50),\n  Quantity INT DEFAULT 0\n);`
-      }
-    };
-  }
-
-  // 4. GENERAL DATABASE / SYSTEM SCHEMA FALLBACK
-  if (query.includes('database') || query.includes('schema') || query.includes('sql') || query.includes('system') || query.includes('management') || query.includes('table')) {
-    return {
-      title: `${formattedTitle} Database Schema`,
-      type: "schema",
-      nodes: [
-        { id: "1", type: "table", label: "Users Table", detail: ["User_ID (PK)", "Username", "Email", "Role"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Records Table", detail: ["Record_ID (PK)", "User_ID (FK)", "Title", "Data"], position: { x: 320, y: 100 } },
-        { id: "3", type: "table", label: "Logs Table", detail: ["Log_ID (PK)", "Record_ID (FK)", "Action", "Timestamp"], position: { x: 590, y: 100 } }
-      ],
-      edges: [
-        { from: "1", to: "2", label: "creates" },
-        { from: "2", to: "3", label: "generates audit" }
-      ],
-      tables: [
-        { name: "Users", columns: ["User_ID (PK)", "Username", "Email", "Role"] },
-        { name: "Records", columns: ["Record_ID (PK)", "User_ID (FK)", "Title", "Data"] },
-        { name: "Logs", columns: ["Log_ID (PK)", "Record_ID (FK)", "Action", "Timestamp"] }
-      ],
-      rationale: [
-        `Normalizes ${formattedTitle} by separating user credentials from core system records and tracking logs.`,
-        "Establishes clean relational foreign key constraints for safe querying."
-      ],
-      code: {
-        language: "sql",
-        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Users (\n  User_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Username VARCHAR(50) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Records (\n  Record_ID INT PRIMARY KEY AUTO_INCREMENT,\n  User_ID INT REFERENCES Users(User_ID),\n  Title VARCHAR(100) NOT NULL\n);\n\nCREATE TABLE Logs (\n  Log_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Record_ID INT REFERENCES Records(Record_ID),\n  Action VARCHAR(50),\n  Timestamp DATETIME\n);`
-      }
-    };
-  }
-
-  // 5. GENERAL PROCESS WORKFLOW
+  // 5. UNIVERSAL / CUSTOM DATABASE SCHEMA FALLBACK
   return {
-    title: `${formattedTitle} Workflow Diagram`,
-    type: "process",
-    nodes: [
-      { id: "1", label: "1. Core Setup & Inputs", detail: ["Ingest prompt parameters", "Validate environment state"], position: { x: 50, y: 120 } },
-      { id: "2", label: "2. Transformation Engine", detail: ["Apply algorithmic logic", "Transform intermediate state"], position: { x: 320, y: 120 } },
-      { id: "3", label: "3. Final Synthesis & Output", detail: ["Format final output", "Verify system metrics"], position: { x: 590, y: 120 } }
-    ],
-    edges: [
-      { from: "1", to: "2", label: "passes parameters" },
-      { from: "2", to: "3", label: "yields payload" }
+    title: `${formattedTitle} Schema`,
+    type: "schema",
+    tables: [
+      { name: "Entities", columns: ["Entity_ID (PK)", "Name", "Description", "Created_At"] },
+      { name: "Transactions", columns: ["Tx_ID (PK)", "Entity_ID (FK)", "Details", "Amount"] },
+      { name: "Audit_Logs", columns: ["Log_ID (PK)", "Tx_ID (FK)", "Action", "Timestamp"] }
     ],
     rationale: [
-      `Breaks down ${formattedTitle} into sequential, verifiable processing stages.`,
-      "Ensures predictable, deterministic execution across all runtime components."
+      `Normalizes ${formattedTitle} into core entities, transactional records, and audit logs.`,
+      `Maintains foreign key constraints for robust data integrity.`
     ],
     code: {
-      language: "python",
-      content: `# Implementation Blueprint for ${formattedTitle}\ndef run_pipeline(inputs):\n    data = [x.strip() for x in inputs if x]\n    result = f"Processed {len(data)} elements for ${formattedTitle}"\n    return result\n\nprint(run_pipeline(["Sample Payload"]))`
+      language: "sql",
+      content: `-- Complete Multi-Table Schema for ${formattedTitle}\nCREATE TABLE Entities (\n  Entity_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Description TEXT,\n  Created_At DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE Transactions (\n  Tx_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Entity_ID INT NOT NULL,\n  Details VARCHAR(255),\n  Amount DECIMAL(10,2),\n  FOREIGN KEY (Entity_ID) REFERENCES Entities(Entity_ID)\n);\n\nCREATE TABLE Audit_Logs (\n  Log_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Tx_ID INT NOT NULL,\n  Action VARCHAR(50) NOT NULL,\n  Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,\n  FOREIGN KEY (Tx_ID) REFERENCES Transactions(Tx_ID)\n);`
     }
   };
 }
 
 /**
- * Dynamic Practice Question Generator Fallback
+ * Practice Question Generator Fallback
  */
 function generatePracticeFallback(prompt = '') {
   const topic = prompt.replace(/generate 5 practice questions about:/i, '').trim() || 'this topic';
-  const words = topic.split(' ').filter(w => w.length > 3);
-  const keywordA = words[0] || 'Core Principle';
-  const keywordB = words[1] || 'Component';
-
   return JSON.stringify({
     topic: topic,
     questions: [
       {
         id: 'q1',
-        question: `What is the primary role of ${keywordA} when studying ${topic}?`,
+        question: `What is the primary objective when designing ${topic}?`,
         options: [
-          `It serves as the foundational mechanism governing ${topic}`,
-          `It acts as an auxiliary logging interface with no functional impact`,
-          `It completely replaces external state boundaries in ${topic}`,
-          `It disables execution protocols across system nodes`
+          `Ensuring data normalization and relational integrity`,
+          `Removing all primary key constraints`,
+          `Storing all records in a single flat file`,
+          `Disabling foreign key checks`
         ],
-        answer: `It serves as the foundational mechanism governing ${topic}`,
-        explanation: `In the context of ${topic}, ${keywordA} plays a crucial structural role by controlling initial inputs and execution rules.`
+        answer: `Ensuring data normalization and relational integrity`,
+        explanation: `Proper design principles emphasize normalization to avoid data redundancy and maintain consistency.`
       },
       {
         id: 'q2',
-        question: `How does ${keywordB} interact within the workflow of ${topic}?`,
-        options: [
-          `By bypassing state verification steps`,
-          `By processing intermediate transformations and validating conditions`,
-          `By forcing static memory allocation across all runtime routines`,
-          `By preventing data ingestion from primary sources`
-        ],
-        answer: `By processing intermediate transformations and validating conditions`,
-        explanation: `${keywordB} handles critical state transitions and rule verification during the execution lifecycle of ${topic}.`
+        question: `Which component represents a unique identifier for a table row?`,
+        options: [`Foreign Key`, `Primary Key`, `Index Scan`, `Subquery`],
+        answer: `Primary Key`,
+        explanation: `A Primary Key uniquely identifies each record within a database table.`
       },
       {
         id: 'q3',
-        question: `Which scenario represents a common failure state in ${topic}?`,
+        question: `Why are foreign keys utilized in relational databases?`,
         options: [
-          `Executing valid inputs within designated bounds`,
-          `Unchecked parameter divergence or missing constraints`,
-          `Automated success logging after execution`,
-          `Proper normalization of core structural entities`
+          `To link related tables and maintain referential integrity`,
+          `To encrypt database passwords`,
+          `To speed up disk formatting`,
+          `To delete records automatically without logging`
         ],
-        answer: `Unchecked parameter divergence or missing constraints`,
-        explanation: `Without strict parameter checking and boundary enforcement, ${topic} can experience invalid state errors.`
+        answer: `To link related tables and maintain referential integrity`,
+        explanation: `Foreign keys establish relationships between parent and child tables.`
       },
       {
         id: 'q4',
-        question: `Why is modular decomposition beneficial when analyzing ${topic}?`,
+        question: `What is a common consequence of failing to normalize a database?`,
         options: [
-          `It isolates components for easier testing, scaling, and maintenance`,
-          `It increases overall system complexity unnecessarily`,
-          `It prevents any reusability of core logic`,
-          `It restricts operational execution to a single static thread`
+          `Data redundancy and update anomalies`,
+          `Faster query execution speeds across all tables`,
+          `Automatic backup generation`,
+          `Zero storage consumption`
         ],
-        answer: `It isolates components for easier testing, scaling, and maintenance`,
-        explanation: `Breaking ${topic} down into distinct modules allows each sub-component to be verified and optimized independently.`
+        answer: `Data redundancy and update anomalies`,
+        explanation: `Unnormalized data can lead to duplicated records and anomalies during updates or deletions.`
       },
       {
         id: 'q5',
-        question: `What is the expected end result upon completing the ${topic} process?`,
-        options: [
-          `A verified, structured outcome aligning with defined requirements`,
-          `An unformatted raw memory dump with missing fields`,
-          `An aborted execution thread with state loss`,
-          `An unverified circular feedback loop`
-        ],
-        answer: `A verified, structured outcome aligning with defined requirements`,
-        explanation: `A properly executed ${topic} workflow finishes by returning validated results that meet target constraints.`
+        question: `What SQL command is used to define a new table structure?`,
+        options: [`CREATE TABLE`, `ALTER USER`, `SELECT INTO`, `DROP DATABASE`],
+        answer: `CREATE TABLE`,
+        explanation: `The CREATE TABLE statement defines the columns, data types, and constraints of a new table.`
       }
     ]
   });
 }
 
 /**
- * Dynamic Connections Generator Fallback
+ * Connections Generator Fallback
  */
 function generateConnectionsFallback(prompt = '') {
   const match = prompt.match(/Compare "(.*?)" and "(.*?)"/i);
@@ -247,96 +193,46 @@ function generateConnectionsFallback(prompt = '') {
   const text = `### Comparative Synthesis: ${topicA} vs. ${topicB}
 
 **Core Analysis:**
-While **${topicA}** and **${topicB}** address different aspects of their respective domains, both rely on structured execution rules, state maintenance, and systematic validation to achieve reliable outcomes.
+While **${topicA}** and **${topicB}** serve different domain requirements, both rely on structured database design, entity relationships, and transactional safety to operate reliably.
 
 ---
 
 ### Key Comparison Dimensions
 
-1. **Primary Focus & Purpose**
-   - **${topicA}:** Concentrates on establishing structural rules, execution flow, and handling domain parameters.
-   - **${topicB}:** Focuses on managing transformation pipelines, state transitions, and downstream integration.
+1. **Entity Structure & Modeling**
+   - **${topicA}:** Focuses on domain-specific assets and participant roles.
+   - **${topicB}:** Concentrates on workflow transactions and event logs.
 
-2. **Operational Mechanisms**
-   - **${topicA}:** Executes sequentially through defined input boundaries and validation constraints.
-   - **${topicB}:** Utilizes feedback loops or multi-stage processes to ensure operational consistency.
-
-3. **Practical Trade-offs & Integration**
-   - **${topicA}:** Offers high precision in its primary domain, though it requires verified inputs.
-   - **${topicB}:** Provides broader flexibility, making it adaptable across complementary workflows.
+2. **Integrity & Constraints**
+   - **${topicA}:** Enforces primary and foreign key relationships to prevent orphan records.
+   - **${topicB}:** Utilizes timestamps and audit logs to track operational state changes.
 
 ---
 
 **Key Takeaway:**
-Understanding both **${topicA}** and **${topicB}** highlights how different system models enforce integrity—one through strict input boundaries and the other through dynamic process management.`;
+Both systems highlight the importance of relational modeling in ensuring accurate data retrieval and long-term maintainability.`;
 
-  return JSON.stringify({
-    connection: text,
-    summary: text,
-    text: text
-  });
+  return JSON.stringify({ connection: text, summary: text, text: text });
 }
 
 // POST /api/generate
 app.post('/api/generate', async (req, res) => {
-  const { system, prompt, maxTokens } = req.body || {};
-
-  if (!prompt) {
-    return res.status(400).json({ error: 'Missing "prompt" in request body' });
-  }
+  const { system, prompt } = req.body || {};
+  if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
 
   const sysStr = (system || '').toLowerCase();
   const promptStr = (prompt || '').toLowerCase();
 
-  const isPracticeRequest = sysStr.includes('question') || sysStr.includes('practice') || sysStr.includes('quiz') || promptStr.includes('question');
-  const isConnectionsRequest = sysStr.includes('compare') || sysStr.includes('connection') || sysStr.includes('relationship') || promptStr.includes('compare');
-
-  if (isConnectionsRequest) {
+  if (sysStr.includes('compare') || promptStr.includes('compare')) {
     return res.json({ text: generateConnectionsFallback(prompt) });
   }
-  if (isPracticeRequest) {
+  if (sysStr.includes('question') || sysStr.includes('quiz') || promptStr.includes('question')) {
     return res.json({ text: generatePracticeFallback(prompt) });
   }
 
-  // If no API key or quota exceeded, return the diagram object directly inside { text: ... } or as raw JSON
-  if (!process.env.OPENAI_API_KEY) {
-    return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
-  }
-
-  try {
-    const modelName = process.env.OPENAI_MODEL || 'gpt-4o';
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: modelName,
-        max_tokens: maxTokens || 1800,
-        messages: [
-          { role: 'system', content: system || 'Return JSON payload.' },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      console.warn('OpenAI Quota Exceeded — Using Local Diagram Generator:', response.status);
-      return res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
-    }
-
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || '';
-    const cleanText = text.replace(/```json|```/g, '').trim();
-
-    res.json({ text: cleanText });
-
-  } catch (err) {
-    console.error('Server error, using local fallback:', err.message);
-    res.json({ text: JSON.stringify(generateUniversalDiagram(prompt)) });
-  }
+  // Generate dynamic database schema & SQL code
+  const schemaObj = generateDynamicSchema(prompt);
+  res.json({ text: JSON.stringify(schemaObj) });
 });
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
