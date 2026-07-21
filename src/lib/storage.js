@@ -1,37 +1,70 @@
-const ITEMS_KEY = 'cortex_study_items';
-const STATS_KEY = 'cortex_practice_stats';
+const STUDY_LOG_KEY = 'cortex_study_log_v1';
+const PRACTICE_STATS_KEY = 'cortex_practice_stats_v1';
 
-export function getStudyItems() {
+export function getStudyLog() {
   try {
-    return JSON.parse(localStorage.getItem(ITEMS_KEY) || '[]');
-  } catch (e) {
+    const data = localStorage.getItem(STUDY_LOG_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (err) {
+    console.error('Failed to load study log from localStorage', err);
     return [];
   }
 }
 
-export function saveStudyItem(entry) {
-  const items = getStudyItems();
-  items.unshift(entry);
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
-  return true;
-}
-
-export function deleteStudyItem(id) {
-  const items = getStudyItems().filter((i) => i.id !== id);
-  localStorage.setItem(ITEMS_KEY, JSON.stringify(items));
-}
-
-export function getStats() {
+export function saveToStudyLog(item) {
   try {
-    return JSON.parse(localStorage.getItem(STATS_KEY) || '{"correct":0,"incorrect":0}');
-  } catch (e) {
-    return { correct: 0, incorrect: 0 };
+    const log = getStudyLog();
+    const newItem = {
+      id: item.id || Date.now().toString(),
+      topic: item.topic || 'Untitled Topic',
+      timestamp: item.timestamp || new Date().toISOString(),
+      data: item.data || item
+    };
+    // Avoid exact duplicates based on topic title
+    const filtered = log.filter(entry => entry.topic.toLowerCase() !== newItem.topic.toLowerCase());
+    const updated = [newItem, ...filtered];
+    localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (err) {
+    console.error('Failed to save to study log', err);
+    return getStudyLog();
   }
 }
 
-export function recordAnswer(result) {
-  const stats = getStats();
-  const next = { ...stats, [result === 'correct' ? 'correct' : 'incorrect']: stats[result === 'correct' ? 'correct' : 'incorrect'] + 1 };
-  localStorage.setItem(STATS_KEY, JSON.stringify(next));
-  return next;
+export function deleteFromStudyLog(id) {
+  try {
+    const log = getStudyLog();
+    const updated = log.filter(item => item.id !== id);
+    localStorage.setItem(STUDY_LOG_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (err) {
+    console.error('Failed to delete item from study log', err);
+    return getStudyLog();
+  }
+}
+
+export function getPracticeStats() {
+  try {
+    const data = localStorage.getItem(PRACTICE_STATS_KEY);
+    return data ? JSON.parse(data) : { correct: 0, incorrect: 0, total: 0 };
+  } catch (err) {
+    console.error('Failed to load practice stats', err);
+    return { correct: 0, incorrect: 0, total: 0 };
+  }
+}
+
+export function savePracticeStats(isCorrect) {
+  try {
+    const stats = getPracticeStats();
+    const updated = {
+      correct: stats.correct + (isCorrect ? 1 : 0),
+      incorrect: stats.incorrect + (isCorrect ? 0 : 1),
+      total: stats.total + 1
+    };
+    localStorage.setItem(PRACTICE_STATS_KEY, JSON.stringify(updated));
+    return updated;
+  } catch (err) {
+    console.error('Failed to save practice stats', err);
+    return getPracticeStats();
+  }
 }
