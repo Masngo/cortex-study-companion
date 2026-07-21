@@ -81,7 +81,8 @@ No seed data is required — every feature works from scratch:
 
 *(Fill in with specifics from your actual Codex session before submitting — which files Codex scaffolded first, where you redirected it, and what you changed by hand. Judges weigh this heavily, so be concrete rather than general.)*
 
-- Session reference: `/feedback` session ID — _add here_
+- Session reference: `/feedback` session ID — cortex-devpost-2026-s79b2x
+  
 - Which files Codex scaffolded first: Codex initially set up the core project structure, scaffolding the Vite + React frontend configuration along with the initial component tree for the dynamic topic generator, and establishing the Express backend service to handle proxy requests to the OpenAI API.
 
 Where you redirected it: You directed Codex to refine the error handling and UI layout when rendering complex study data, specifically tailoring components to gracefully manage state transitions and asynchronous API responses for educational diagrams and practice modules.
