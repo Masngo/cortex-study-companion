@@ -16,37 +16,7 @@ function generateUniversalDiagram(prompt = '') {
   const cleanTitle = prompt.trim() ? prompt.slice(0, 45) : 'System Model';
   const formattedTitle = cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1);
 
-  // 1. LIBRARY MANAGEMENT SYSTEM
-  if (query.includes('library') || query.includes('book') || query.includes('borrow')) {
-    return {
-      title: `${formattedTitle} Database Schema`,
-      type: "schema",
-      nodes: [
-        { id: "1", type: "table", label: "Books Table", detail: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Members Table", detail: ["Member_ID (PK)", "Name", "Email", "Join_Date"], position: { x: 320, y: 100 } },
-        { id: "3", type: "table", label: "Loans Table", detail: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"], position: { x: 590, y: 100 } }
-      ],
-      edges: [
-        { from: "2", to: "3", label: "borrows" },
-        { from: "1", to: "3", label: "is loaned in" }
-      ],
-      tables: [
-        { name: "Books", columns: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"] },
-        { name: "Members", columns: ["Member_ID (PK)", "Name", "Email", "Join_Date"] },
-        { name: "Loans", columns: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"] }
-      ],
-      rationale: [
-        `Structures ${formattedTitle} by separating catalog assets from membership and active loan transactions.`,
-        "Enforces relational foreign keys to track book availability and member checkouts."
-      ],
-      code: {
-        language: "sql",
-        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Books (\n  Book_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Title VARCHAR(150) NOT NULL,\n  Author VARCHAR(100),\n  ISBN VARCHAR(20) UNIQUE,\n  Stock INT DEFAULT 1\n);\n\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Loans (\n  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Book_ID INT REFERENCES Books(Book_ID),\n  Member_ID INT REFERENCES Members(Member_ID),\n  Due_Date DATE\n);`
-      }
-    };
-  }
-
-  // 2. HOSPITAL / MEDICAL SYSTEM
+  // 1. HOSPITAL / MEDICAL SYSTEM (Checked first to prevent overlapping keywords)
   if (query.includes('hospital') || query.includes('patient') || query.includes('doctor') || query.includes('medical')) {
     return {
       title: `${formattedTitle} Database Schema`,
@@ -76,14 +46,44 @@ function generateUniversalDiagram(prompt = '') {
     };
   }
 
-  // 3. FARM MANAGEMENT (Default database schema fallback)
-  if (query.includes('database') || query.includes('schema') || query.includes('sql') || query.includes('farm') || query.includes('system') || query.includes('management') || query.includes('table')) {
+  // 2. LIBRARY MANAGEMENT SYSTEM
+  if (query.includes('library') || query.includes('book') || query.includes('borrow')) {
+    return {
+      title: `${formattedTitle} Database Schema`,
+      type: "schema",
+      nodes: [
+        { id: "1", type: "table", label: "Books Table", detail: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"], position: { x: 50, y: 100 } },
+        { id: "2", type: "table", label: "Members Table", detail: ["Member_ID (PK)", "Name", "Email", "Join_Date"], position: { x: 320, y: 100 } },
+        { id: "3", type: "table", label: "Loans Table", detail: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"], position: { x: 590, y: 100 } }
+      ],
+      edges: [
+        { from: "2", to: "3", label: "borrows" },
+        { from: "1", to: "3", label: "is loaned in" }
+      ],
+      tables: [
+        { name: "Books", columns: ["Book_ID (PK)", "Title", "Author", "ISBN", "Stock"] },
+        { name: "Members", columns: ["Member_ID (PK)", "Name", "Email", "Join_Date"] },
+        { name: "Loans", columns: ["Loan_ID (PK)", "Book_ID (FK)", "Member_ID (FK)", "Due_Date"] }
+      ],
+      rationale: [
+        `Structures ${formattedTitle} by separating catalog assets from membership and active loan transactions.`,
+        "Enforces relational foreign keys to track book availability and member checkouts."
+      ],
+      code: {
+        language: "sql",
+        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Books (\n  Book_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Title VARCHAR(150) NOT NULL,\n  Author VARCHAR(100),\n  ISBN VARCHAR(20) UNIQUE,\n  Stock INT DEFAULT 1\n);\n\nCREATE TABLE Members (\n  Member_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Name VARCHAR(100) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Loans (\n  Loan_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Book_ID INT REFERENCES Books(Book_ID),\n  Member_ID INT REFERENCES Members(Member_ID),\n  Due_Date DATE\n);`
+      }
+    };
+  }
+
+  // 3. FARM MANAGEMENT SYSTEM
+  if (query.includes('farm') || query.includes('crop') || query.includes('livestock') || query.includes('agriculture')) {
     return {
       title: `${formattedTitle} Database Schema`,
       type: "schema",
       nodes: [
         { id: "1", type: "table", label: "Farms Table", detail: ["Farm_ID (PK)", "Farm_Name", "Location", "Owner_ID"], position: { x: 50, y: 100 } },
-        { id: "2", type: "table", label: "Inventory / Yield Table", detail: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"], position: { x: 320, y: 100 } },
+        { id: "2", type: "table", label: "Inventory Table", detail: ["Item_ID (PK)", "Farm_ID (FK)", "Category", "Quantity"], position: { x: 320, y: 100 } },
         { id: "3", type: "table", label: "Logs Table", detail: ["Log_ID (PK)", "Farm_ID (FK)", "Activity_Type", "Timestamp"], position: { x: 590, y: 100 } }
       ],
       edges: [
@@ -106,7 +106,37 @@ function generateUniversalDiagram(prompt = '') {
     };
   }
 
-  // 4. GENERAL PROCESS WORKFLOW
+  // 4. GENERAL DATABASE / SYSTEM SCHEMA FALLBACK
+  if (query.includes('database') || query.includes('schema') || query.includes('sql') || query.includes('system') || query.includes('management') || query.includes('table')) {
+    return {
+      title: `${formattedTitle} Database Schema`,
+      type: "schema",
+      nodes: [
+        { id: "1", type: "table", label: "Users Table", detail: ["User_ID (PK)", "Username", "Email", "Role"], position: { x: 50, y: 100 } },
+        { id: "2", type: "table", label: "Records Table", detail: ["Record_ID (PK)", "User_ID (FK)", "Title", "Data"], position: { x: 320, y: 100 } },
+        { id: "3", type: "table", label: "Logs Table", detail: ["Log_ID (PK)", "Record_ID (FK)", "Action", "Timestamp"], position: { x: 590, y: 100 } }
+      ],
+      edges: [
+        { from: "1", to: "2", label: "creates" },
+        { from: "2", to: "3", label: "generates audit" }
+      ],
+      tables: [
+        { name: "Users", columns: ["User_ID (PK)", "Username", "Email", "Role"] },
+        { name: "Records", columns: ["Record_ID (PK)", "User_ID (FK)", "Title", "Data"] },
+        { name: "Logs", columns: ["Log_ID (PK)", "Record_ID (FK)", "Action", "Timestamp"] }
+      ],
+      rationale: [
+        `Normalizes ${formattedTitle} by separating user credentials from core system records and tracking logs.`,
+        "Establishes clean relational foreign key constraints for safe querying."
+      ],
+      code: {
+        language: "sql",
+        content: `-- SQL DDL for ${formattedTitle}\nCREATE TABLE Users (\n  User_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Username VARCHAR(50) NOT NULL,\n  Email VARCHAR(100) UNIQUE\n);\n\nCREATE TABLE Records (\n  Record_ID INT PRIMARY KEY AUTO_INCREMENT,\n  User_ID INT REFERENCES Users(User_ID),\n  Title VARCHAR(100) NOT NULL\n);\n\nCREATE TABLE Logs (\n  Log_ID INT PRIMARY KEY AUTO_INCREMENT,\n  Record_ID INT REFERENCES Records(Record_ID),\n  Action VARCHAR(50),\n  Timestamp DATETIME\n);`
+      }
+    };
+  }
+
+  // 5. GENERAL PROCESS WORKFLOW
   return {
     title: `${formattedTitle} Workflow Diagram`,
     type: "process",
