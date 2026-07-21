@@ -9,13 +9,14 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 
 /**
- * Fallback for Connections Tab (Returns formatted Markdown text directly)
+ * Fallback for Connections Tab
+ * Returns valid JSON containing a structured connection string to satisfy JSON.parse() on the frontend.
  */
 function generateConnectionsFallback(prompt = '') {
-  return `### Structural Synthesis & Systemic Comparison
+  const comparisonText = `### Structural Synthesis & Systemic Comparison
 
 **Core Overview:**
-Both systems rely on sequential stage execution, state transitions, and feedback loops to maintain system balance and deliver continuous, reliable flow.
+Both systems rely on sequential stage execution, state transitions, and feedback loops to maintain balance and deliver continuous, reliable flow.
 
 ---
 
@@ -37,6 +38,12 @@ Both systems rely on sequential stage execution, state transitions, and feedback
 
 **Key Takeaway:**
 Despite operating in completely different domains (digital networking vs. natural science), both frameworks demonstrate how complex systems maintain operational integrity through structured state transitions, handshakes, and feedback protocols.`;
+
+  return JSON.stringify({
+    connection: comparisonText,
+    summary: comparisonText,
+    text: comparisonText
+  });
 }
 
 /**
@@ -113,6 +120,7 @@ function generatePracticeFallback(topic = '') {
     });
   }
 
+  // Generic 5-Question Fallback
   return JSON.stringify({
     topic: topic,
     questions: [
