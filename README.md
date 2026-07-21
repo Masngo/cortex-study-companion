@@ -111,18 +111,14 @@ Here is Cortex in action generating schemas and runnable SQL for different syste
 <img width="1914" height="973" alt="image" src="https://github.com/user-attachments/assets/ed8b972b-cb2d-4f9d-983d-aad2ea579c13" />
 
 
-### **3. Farm Management System**
-![Farm Management Schema](./assets/cortex_app_dashboard7.png)
-![Farm Management SQL](./assets/cortex_app_dashboard6.png###
+### **3. School Management System**
+
+<img width="1918" height="967" alt="image" src="https://github.com/user-attachments/assets/a9f6128e-36cc-42fa-ad19-02990fa65385" />
 
 
-**1. Church System Architecture & Schema**
+
+**4. Church System Architecture & Schema**
 
 <img width="1912" height="958" alt="image" src="https://github.com/user-attachments/assets/ea9eed52-49bb-419b-8890-8fcd0b5b4615" />
  
 
-### **2. Library Management System**
-[Library Management Schema](./assets/cortex_app_dashboard8.png) | [Library Management SQL](./assets/cortex_app_dashboard_runnable-sql_4.png)
-
-### **3. Farm Management System**
-[Farm Management Schema](./assets/cortex_app_dashboard7.png) | [Farm Management SQL](./assets/cortex_app_dashboard6.png))
