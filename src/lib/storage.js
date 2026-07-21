@@ -11,6 +11,9 @@ export function getStudyLog() {
   }
 }
 
+// Aliases to match SavedTab and other components
+export const getStudyItems = getStudyLog;
+
 export function saveToStudyLog(item) {
   try {
     const log = getStudyLog();
@@ -30,7 +33,6 @@ export function saveToStudyLog(item) {
   }
 }
 
-// Alias to support components importing saveStudyItem
 export const saveStudyItem = saveToStudyLog;
 
 export function deleteFromStudyLog(id) {
@@ -44,6 +46,8 @@ export function deleteFromStudyLog(id) {
     return getStudyLog();
   }
 }
+
+export const deleteStudyItem = deleteFromStudyLog;
 
 export function getPracticeStats() {
   try {
